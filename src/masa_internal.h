@@ -178,6 +178,17 @@ namespace MASA
 
     virtual Scalar eval_exact_u_boundary(Scalar)            {std::cout << "MASA ERROR:: Analytical Solution (boundary) is unavailable or not properly loaded.\n"; return -1.33;};
 
+    // MY STUFF
+
+    virtual Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
+
+    virtual Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_1) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+    virtual Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+    virtual Scalar eval_exact_mD_3(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_3) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+ 
+    virtual Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_1) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+    virtual Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+    virtual Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_3) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
   /*
    * -------------------------------------------------------------------------------------------
    *
@@ -252,6 +263,9 @@ namespace MASA
     virtual Scalar eval_q_rho_C (Scalar)    {std::cout << "MASA ERROR:: Source Term (N )    is unavailable or not properly loaded.\n"; return -1.33;};
     virtual Scalar eval_q_rho_C3(Scalar)    {std::cout << "MASA ERROR:: Source Term (N2)    is unavailable or not properly loaded.\n"; return -1.33;};
 
+    // MY STUFF
+    virtual Scalar eval_q_phi(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (phi) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (omega) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
   /*
    * -------------------------------------------------------------------------------------------
    *
@@ -2365,7 +2379,52 @@ public:
   Scalar eval_exact_w(Scalar,Scalar,Scalar,Scalar);
 };}
 
+// ------------------------------------------------------
+// --------------- navierstokes_3d_variabledensity 
+// ------------------------------------------------------
+namespace MASA{
+template <typename Scalar>
+class navierstokes_3d_variabledensity : public manufactured_solution<Scalar>
+{
+  using manufactured_solution<Scalar>::pi;
+  using manufactured_solution<Scalar>::PI;
 
+private:
+  Scalar a_psi;
+  Scalar c_psi;
+  Scalar e_psi;
+  Scalar a_phi;
+  Scalar b_phi;
+  Scalar re;
+  Scalar sc;
+  Scalar kx;
+  Scalar kz;
+  Scalar kMag;
+
+public:
+  navierstokes_3d_variabledensity();
+  int init_var();
+  Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_phi  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_rho  (Scalar,Scalar,Scalar,Scalar);
+//  Scalar eval_q_u(Scalar,Scalar,Scalar);
+//  Scalar eval_q_v(Scalar,Scalar,Scalar);
+//  Scalar eval_q_w(Scalar,Scalar,Scalar);
+//  Scalar eval_q_rho(Scalar,Scalar,Scalar);
+//  Scalar eval_exact_om(Scalar,Scalar,Scalar,Scalar);
+//  Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_rho(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mD_3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar);
+
+//  NumberVector<int,Scalar> Cij(Scalar,Scalar,Scalar,Scalar);
+//  NumberVector<int,Scalar> DivTauij(Scalar,Scalar,Scalar,Scalar);
+};}
 #endif // HAVE_METAPHYSICL
 
 // --l33t--

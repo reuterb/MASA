@@ -65,7 +65,7 @@ program main
   dz = real(lz)/real(nz);
 
   ! initialize the problem
-  call masa_init("incompressible homogeneous isotropic NS example","navierstokes_3d_incompressible")
+  call masa_init("incompressible homogeneous isotropic NS example","navierstokes_3d_variabledensity")
 
   ! evaluate source terms (3D)
   do i=0, nx
@@ -77,14 +77,14 @@ program main
            z = k*dz
         
            ! evalulate source term
-           u = masa_eval_3d_source_u   (x,y,z)
-           v = masa_eval_3d_source_v   (x,y,z)
-           w = masa_eval_3d_source_w   (x,y,z)
+           u = masa_eval_4d_source_phi   (x,y,z,0d0)
+           v = masa_eval_4d_source_omega   (x,y,z,0d0)
+           w = masa_eval_4d_source_rho   (x,y,z,0d0)
            
            !evaluate analytical term
-           exact_u = masa_eval_3d_exact_u (x,y,z)
-           exact_v = masa_eval_3d_exact_v (x,y,z)
-           exact_w = masa_eval_3d_exact_w (x,y,z)
+           exact_u = masa_eval_4d_exact_mC_1 (x,y,z,0d0)
+           exact_v = masa_eval_4d_exact_mC_2 (x,y,z,0d0)
+           exact_w = masa_eval_4d_exact_mC_3 (x,y,z,0d0)
            
            call test(u)
            call test(v)

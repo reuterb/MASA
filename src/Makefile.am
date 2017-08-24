@@ -21,6 +21,7 @@ cc_sources += navierstokes_3d_incompressible.cpp
 cc_sources += navierstokes_3d_incompressible_homogeneous.cpp
 cc_sources += navierstokes_3d_incompbouss_homogeneous.cpp
 cc_sources += navierstokes_3d_transient_sutherland.cpp
+cc_sources += navierstokes_3d_variabledensity.cpp
 # do not edit this line! --l33t--
 
 # License Information

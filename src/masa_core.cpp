@@ -162,6 +162,7 @@ int get_list_mms(std::vector<manufactured_solution<Scalar>*>& anim)
   anim.push_back(new navierstokes_3d_incompressible_homogeneous<Scalar>());
   anim.push_back(new navierstokes_3d_incompbouss_homogeneous<Scalar>());
   anim.push_back(new navierstokes_3d_transient_sutherland<Scalar>());
+  anim.push_back(new navierstokes_3d_variabledensity<Scalar>());
 #endif // HAVE_METAPHYSICL
 
   // automatically generated MMS:
@@ -1022,6 +1023,19 @@ Scalar MASA::masa_eval_source_nu(Scalar x,Scalar y,Scalar z)
   return masa_master<Scalar>().get_ms().eval_q_nu(x,y,z);
 }
 
+// MY STUFF
+template <typename Scalar>
+Scalar MASA::masa_eval_source_omega(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_omega(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_phi(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_phi(x,y,z,t);
+}
+
   // --------------------------------
   // analytical terms
   // --------------------------------
@@ -1186,6 +1200,50 @@ template <typename Scalar>
 Scalar MASA::masa_eval_grad_rho(Scalar x,Scalar y,Scalar z,Scalar t,int i)
 {
   return masa_master<Scalar>().get_ms().eval_g_rho(x,y,z,t,i);
+}
+
+// MY STUFF
+//
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mu(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mu(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mD_1(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mD_1(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mD_2(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mD_2(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mD_3(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mD_3(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mC_1(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mC_1(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mC_2(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mC_2(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_mC_3(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mC_3(x,y,z,t);
 }
 
 /* ------------------------------------------------
@@ -1415,6 +1473,15 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_grad_rho<Scalar>(Scalar,Scalar,int); \
   template Scalar masa_eval_grad_rho<Scalar>(Scalar,Scalar,Scalar,int); \
   template Scalar masa_eval_grad_rho<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
+  template Scalar masa_eval_source_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mD_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mD_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mD_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mC_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mC_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mC_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template int masa_test_poly<Scalar>();                             \
   template int masa_printid<Scalar>(); \
   template int masa_display_param<Scalar>(); \
