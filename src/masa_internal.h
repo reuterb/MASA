@@ -180,7 +180,9 @@ namespace MASA
 
     // MY STUFF
 
-    virtual Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar)    {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar)   {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
 
     virtual Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_1) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
@@ -189,6 +191,7 @@ namespace MASA
     virtual Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_1) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_3) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+
   /*
    * -------------------------------------------------------------------------------------------
    *
@@ -303,6 +306,12 @@ namespace MASA
     virtual Scalar eval_g_rho(Scalar,Scalar,int)               {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 2d gradient
     virtual Scalar eval_g_rho(Scalar,Scalar,Scalar,int)        {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d gradient
     virtual Scalar eval_g_rho(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
+    
+    // MY STUFF  NOTE THIS IS NOT REALLY GRAD BUT WHAT WE ACTUALLY WANT DIVTAU
+    
+    virtual Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
+
+
 
   /*
    * -------------------------------------------------------------------------------------------
@@ -2390,11 +2399,6 @@ class navierstokes_3d_variabledensity : public manufactured_solution<Scalar>
   using manufactured_solution<Scalar>::PI;
 
 private:
-  Scalar a_psi;
-  Scalar c_psi;
-  Scalar e_psi;
-  Scalar a_phi;
-  Scalar b_phi;
   Scalar re;
   Scalar sc;
   Scalar kx;
@@ -2411,8 +2415,8 @@ public:
 //  Scalar eval_q_v(Scalar,Scalar,Scalar);
 //  Scalar eval_q_w(Scalar,Scalar,Scalar);
 //  Scalar eval_q_rho(Scalar,Scalar,Scalar);
-//  Scalar eval_exact_om(Scalar,Scalar,Scalar,Scalar);
-//  Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_rho(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar);
@@ -2421,6 +2425,7 @@ public:
   Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int);
 
 //  NumberVector<int,Scalar> Cij(Scalar,Scalar,Scalar,Scalar);
 //  NumberVector<int,Scalar> DivTauij(Scalar,Scalar,Scalar,Scalar);

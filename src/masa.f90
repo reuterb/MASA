@@ -1523,6 +1523,51 @@ module masa
 
   interface
      !> Evaluates the 'four' dimensional exact solution of the
+     !! vertical component of the Laplacian of the divergence-free momentum.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the exact solution.
+     !!
+     real (c_double) function masa_eval_4d_exact_phi(x,y,z,t) bind (C,name='masa_eval_4d_exact_phi')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+    end function masa_eval_4d_exact_phi
+  end interface
+
+ 
+  interface
+     !> Evaluates the 'four' dimensional exact solution of the
+     !! vertical component of the curl of the divergence-free momentum.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the exact solution.
+     !!
+     real (c_double) function masa_eval_4d_exact_omega(x,y,z,t) bind (C,name='masa_eval_4d_exact_omega')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+    end function masa_eval_4d_exact_omega
+  end interface
+
+  interface
+     !> Evaluates the 'four' dimensional exact solution of the
      !! x-component of the curl-free momentum.
      !!
      !! @param[in] x Real(8) value of the x-coordinate.
@@ -1894,6 +1939,20 @@ module masa
      end function masa_eval_4d_grad_rho
   end interface
 
+  !! MY STUFF
+   interface
+     real (c_double) function masa_eval_4d_grad_DivTau(x,y,z,t,it) bind (C,name='masa_eval_4d_grad_DivTau')
+       use iso_c_binding
+       implicit none
+
+       real    (c_double), value :: x
+       real    (c_double), value :: y
+       real    (c_double), value :: z
+       real    (c_double), value :: t
+       integer (c_int),    value :: it
+
+     end function masa_eval_4d_grad_DivTau
+  end interface 
 contains
   
   ! ----------------------------------------------------------------

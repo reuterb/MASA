@@ -1211,6 +1211,19 @@ Scalar MASA::masa_eval_exact_mu(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_exact_omega(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_omega(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_phi(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_phi(x,y,z,t);
+}
+
+
+template <typename Scalar>
 Scalar MASA::masa_eval_exact_mD_1(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_exact_mD_1(x,y,z,t);
@@ -1246,6 +1259,11 @@ Scalar MASA::masa_eval_exact_mC_3(Scalar x,Scalar y,Scalar z,Scalar t)
   return masa_master<Scalar>().get_ms().eval_exact_mC_3(x,y,z,t);
 }
 
+template <typename Scalar>
+Scalar MASA::masa_eval_grad_DivTau(Scalar x,Scalar y,Scalar z,Scalar t,int i)
+{
+  return masa_master<Scalar>().get_ms().eval_g_DivTau(x,y,z,t,i);
+}
 /* ------------------------------------------------
  *
  *         utility functions
@@ -1476,12 +1494,15 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mD_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mD_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mD_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_grad_DivTau<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template int masa_test_poly<Scalar>();                             \
   template int masa_printid<Scalar>(); \
   template int masa_display_param<Scalar>(); \

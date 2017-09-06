@@ -447,6 +447,11 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_source_rho_e(Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
+  template <typename Scalar>
+  Scalar masa_eval_source_omega  (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_source_phi    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   // --------------------------------
   // manufactured analytical solution -- 4D
@@ -470,6 +475,32 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_exact_rho    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
+  template <typename Scalar>
+  Scalar masa_eval_exact_mD_1      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_mD_2      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_mD_3      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_mC_1      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_mC_2      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_mC_3      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_mu        (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_phi       (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_omega     (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   // --------------------------------
   // gradient of analytical solutions
@@ -551,6 +582,9 @@ namespace MASA
 
   template <typename Scalar>
   Scalar masa_eval_grad_rho(Scalar,Scalar,Scalar,Scalar,int);
+
+  template <typename Scalar>
+  Scalar masa_eval_grad_DivTau(Scalar,Scalar,Scalar,Scalar,int);
 
   // --------------------------------
   // internal masa functions user might want to call
