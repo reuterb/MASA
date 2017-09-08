@@ -192,6 +192,9 @@ namespace MASA
     virtual Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_3) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
 
+    virtual Scalar eval_exact_RHSomega(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (RHSomega) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+    virtual Scalar eval_exact_RHSphi(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (RHSphi) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+
   /*
    * -------------------------------------------------------------------------------------------
    *
@@ -310,6 +313,8 @@ namespace MASA
     // MY STUFF  NOTE THIS IS NOT REALLY GRAD BUT WHAT WE ACTUALLY WANT DIVTAU
     
     virtual Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
+
+    virtual Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
 
 
 
@@ -2401,8 +2406,17 @@ class navierstokes_3d_variabledensity : public manufactured_solution<Scalar>
 private:
   Scalar re;
   Scalar sc;
-  Scalar kx;
-  Scalar kz;
+  Scalar numModes;
+  Scalar kx1;
+  Scalar kx2;
+  Scalar kx3;
+  Scalar kx4;
+  Scalar kx5;
+  Scalar kz1;
+  Scalar kz2;
+  Scalar kz3;
+  Scalar kz4;
+  Scalar kz5;
   Scalar kMag;
 
 public:
@@ -2425,7 +2439,10 @@ public:
   Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_RHSomega(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_RHSphi(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int);
 
 //  NumberVector<int,Scalar> Cij(Scalar,Scalar,Scalar,Scalar);
 //  NumberVector<int,Scalar> DivTauij(Scalar,Scalar,Scalar,Scalar);

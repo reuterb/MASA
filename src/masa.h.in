@@ -502,6 +502,12 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_exact_omega     (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
+  template <typename Scalar>
+  Scalar masa_eval_exact_RHSomega     (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_RHSphi     (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
   // --------------------------------
   // gradient of analytical solutions
   // --------------------------------
@@ -585,6 +591,9 @@ namespace MASA
 
   template <typename Scalar>
   Scalar masa_eval_grad_DivTau(Scalar,Scalar,Scalar,Scalar,int);
+
+  template <typename Scalar>
+  Scalar masa_eval_grad_C(Scalar,Scalar,Scalar,Scalar,int);
 
   // --------------------------------
   // internal masa functions user might want to call

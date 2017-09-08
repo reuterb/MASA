@@ -1260,9 +1260,29 @@ Scalar MASA::masa_eval_exact_mC_3(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_exact_RHSomega(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_RHSomega(x,y,z,t);
+}
+
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_RHSphi(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_RHSphi(x,y,z,t);
+}
+
+
+template <typename Scalar>
 Scalar MASA::masa_eval_grad_DivTau(Scalar x,Scalar y,Scalar z,Scalar t,int i)
 {
   return masa_master<Scalar>().get_ms().eval_g_DivTau(x,y,z,t,i);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_grad_C(Scalar x,Scalar y,Scalar z,Scalar t,int i)
+{
+  return masa_master<Scalar>().get_ms().eval_g_C(x,y,z,t,i);
 }
 /* ------------------------------------------------
  *
@@ -1502,7 +1522,10 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_exact_mC_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_RHSomega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_RHSphi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_grad_DivTau<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
+  template Scalar masa_eval_grad_C<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template int masa_test_poly<Scalar>();                             \
   template int masa_printid<Scalar>(); \
   template int masa_display_param<Scalar>(); \

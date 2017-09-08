@@ -300,5 +300,9 @@ extern "C" double masa_eval_4d_exact_mC_3     (double x,double y,double z,double
 extern "C" double masa_eval_4d_exact_mu       (double x,double y,double z,double t){return(masa_eval_exact_mu   <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_omega    (double x,double y,double z,double t){return(masa_eval_exact_omega<double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_phi      (double x,double y,double z,double t){return(masa_eval_exact_phi  <double>  (x,y,z,t));}
+extern "C" double masa_eval_4d_exact_RHSomega      (double x,double y,double z,double t){return(masa_eval_exact_RHSomega  <double>  (x,y,z,t));}
+extern "C" double masa_eval_4d_exact_RHSphi      (double x,double y,double z,double t){return(masa_eval_exact_RHSphi  <double>  (x,y,z,t));}
 
 extern "C" double masa_eval_4d_grad_DivTau (double x,double y,double z,double t,int i){return(masa_eval_grad_DivTau<double>(x,y,z,t,i));}
+
+extern "C" double masa_eval_4d_grad_C (double x,double y,double z,double t,int i){return(masa_eval_grad_C<double>(x,y,z,t,i));}
