@@ -30,34 +30,25 @@
 
 // Private methods declarations
 template <typename Scalar, typename Scalar2>
-Scalar helper_zeta(Scalar2 kx1, Scalar2 kz1, 
-                   Scalar2 kx2, Scalar2 kz2, 
-                   Scalar2 kx3, Scalar2 kz3, 
-                   Scalar2 kx4, Scalar2 kz4, 
-                   Scalar2 kx5, Scalar2 kz5,
-                   Scalar2 numModes, 
-                   Scalar x, Scalar z);
+Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z);
 
 template <typename Scalar, typename Scalar2>
-Scalar helper_meanOnly(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z);
-
-template <typename Scalar, typename Scalar2>
-Scalar helper_psi(Scalar2 kx1, Scalar2 kz1, 
-                  Scalar2 kx2, Scalar2 kz2, 
-                  Scalar2 kx3, Scalar2 kz3, 
-                  Scalar2 kx4, Scalar2 kz4, 
-                  Scalar2 kx5, Scalar2 kz5,
-                  Scalar2 numModes, 
-                  Scalar y);
+Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y);
   
 template <typename Scalar, typename Scalar2>
-Scalar helper_phi(Scalar2 kx1, Scalar2 kz1, 
-                  Scalar2 kx2, Scalar2 kz2, 
-                  Scalar2 kx3, Scalar2 kz3, 
-                  Scalar2 kx4, Scalar2 kz4, 
-                  Scalar2 kx5, Scalar2 kz5,
-                  Scalar2 numModes, 
-                  Scalar y);
+Scalar helper_phi(Scalar2 kx, Scalar2 kz, Scalar y);
+
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaPhi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                      Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                      Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar x, Scalar y, Scalar z);
+
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaPsi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                      Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                      Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar x, Scalar y, Scalar z);
 
 template <typename Scalar>
 Scalar helper_alpha(Scalar y);
@@ -87,18 +78,18 @@ MASA::navierstokes_3d_variabledensity<Scalar>::navierstokes_3d_variabledensity()
 
   this->register_var("re",&re);
   this->register_var("sc",&sc);
-  this->register_var("numModes",&numModes);
   this->register_var("kx1",&kx1);
-  this->register_var("kx2",&kx2);
-  this->register_var("kx3",&kx3);
-  this->register_var("kx4",&kx4);
-  this->register_var("kx5",&kx5);
   this->register_var("kz1",&kz1);
+  this->register_var("kx2",&kx2);
   this->register_var("kz2",&kz2);
+  this->register_var("kx3",&kx3);
   this->register_var("kz3",&kz3);
+  this->register_var("kx4",&kx4);
   this->register_var("kz4",&kz4);
+  this->register_var("kx5",&kx5);
   this->register_var("kz5",&kz5);
-  this->register_var("kMag",&kMag);
+ 
+  this->register_var("numModes",&numModes);
 
   this->init_var();
 
@@ -113,22 +104,20 @@ int MASA::navierstokes_3d_variabledensity<Scalar>::init_var()
 
   kx = 1.0;
   kz = 1.0;
-  kMag = std::sqrt(kx*kx + kz*kz);
 
   err += this->set_var("re",1);
   err += this->set_var("sc",1);
-  err += this->set_var("numModes",1);
   err += this->set_var("kx1",kx);
+  err += this->set_var("kz1",kz); 
   err += this->set_var("kx2",kx);
-  err += this->set_var("kx3",kx);
-  err += this->set_var("kx4",kx);
-  err += this->set_var("kx5",kx);
-  err += this->set_var("kz1",kx);
   err += this->set_var("kz2",kz); 
+  err += this->set_var("kx3",kx);
   err += this->set_var("kz3",kz); 
+  err += this->set_var("kx4",kx);
   err += this->set_var("kz4",kz); 
+  err += this->set_var("kx5",kx);
   err += this->set_var("kz5",kz); 
-  err += this->set_var("kMag",kMag); 
+  err += this->set_var("numModes",1); 
 
   return err;
 
@@ -152,7 +141,6 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
   typedef DualNumber<SecondDerivTimeType, NumberVector<NDIM+1, SecondDerivTimeType> > ThirdDerivTimeType;
   typedef ThirdDerivTimeType ADTimeScalar;
 
-
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
 
@@ -160,24 +148,23 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
+  
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mD[0] =  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
-  mD[1] = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
-  mD[2] = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_beta(y);// * helper_T(t1); 
+  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -195,11 +182,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
 
   ADTimeScalar omega = 
         // d m_1^d / dz
-    ( helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[2] *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,yt).derivatives()[1] * helper_T(tt) )
+    ( helper_zeta(kx1,kz1,xt,zt).derivatives()[2] *
+           helper_phi(kx1,kz1,yt).derivatives()[1] * helper_T(tt) )
     -   // d m_3^d / dz
-    (-helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[0] *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,yt).derivatives()[1] * helper_T(tt) );
+    (-helper_zeta(kx1,kz1,xt,zt).derivatives()[0] *
+           helper_phi(kx1,kz1,yt).derivatives()[1] * helper_T(tt) );
 
   // get DivCij
 
@@ -231,7 +218,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
               
               );
 
-  return Q_omega;
+  return -Q_omega;
 }
 
 template <typename Scalar>
@@ -255,24 +242,24 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
+  //
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mD[0] =  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
-  mD[1] = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
-  mD[2] = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_beta(y);// * helper_T(t1); 
+  mC = gradient(zetaPsi)*helper_T(t1);
+
+  ADScalar rho = helper_alpha(y);//helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar mu  = helper_beta(y);//helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -288,24 +275,17 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
 
   // phi = lap( m_2^d ) 
 
+  ADTimeScalar m2_D = 
+    ( helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                     xt,yt,zt).derivatives()[2] 
+    - 
+      helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                     xt,yt,zt).derivatives()[0] ) * helper_T(tt);
+
   ADTimeScalar phi = 
-        // d^2 m_2^d / dx^2
-    (  ((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[2])
-                                 .derivatives()[0]).derivatives()[0] 
-      -((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[0])
-                                 .derivatives()[0]).derivatives()[0]) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,yt) * helper_T(tt) +
-        // d^2 m_2^d / dy^2
-    (   helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[2]
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[0] ) * 
-       (helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,yt).derivatives()[1]).derivatives()[1] * 
-        helper_T(tt) +
-        // d^2 m_2^d / dz^2
-    (  ((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[2])
-                                 .derivatives()[2]).derivatives()[2] 
-      -((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,zt).derivatives()[0])
-                                 .derivatives()[2]).derivatives()[2]) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,yt) * helper_T(tt);
+          m2_D.derivatives()[0].derivatives()[0]
+        + m2_D.derivatives()[1].derivatives()[1]
+        + m2_D.derivatives()[2].derivatives()[2];
 
   // get DivCij
 
@@ -342,7 +322,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
 
               );
 
-  return Q_phi;
+  return -Q_phi;
 }
 
 template <typename Scalar>
@@ -367,12 +347,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+
+  mC = gradient(zetaPsi)*helper_T(t1);
 
   // Time part
 
@@ -385,7 +364,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar rho = helper_alpha(yt);//*helper_meanOnly(kx,kz,x1,z1);//* helper_alpha(yt);// * helper_T(tt); 
+  ADTimeScalar rho = helper_alpha(yt);//helper_zeta(kx,kz,xt,zt) * helper_alpha(yt);// * helper_T(tt); 
 
   // Rho equation residuals
   Scalar Q_rho = 
@@ -400,7 +379,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
 
               );
 
-  return Q_rho;
+  return -Q_rho;
 }
 //
 //
@@ -483,183 +462,138 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
 // ----------------------------------------
 // Analytical Terms
 // ----------------------------------------
+//
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaPsi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                      Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                      Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar x, Scalar y, Scalar z)
+{
+
+  Scalar func = 0.0;
+
+  int modes = int(numModes);
+
+  switch (modes) {
+
+    case 1:
+
+      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+      break;
+
+    case 5:
+
+      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y)
+           +  helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y)
+           +  helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y)
+           +  helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y)
+           +  helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+      break;
+
+  }
+
+  return func;
+
+}
+
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaPhi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                      Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                      Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar x, Scalar y, Scalar z)
+{
+
+  Scalar func = 0.0;
+
+  int modes = int(numModes);
+
+  switch (modes) {
+
+    case 1:
+
+      func += helper_zeta(kx1,kz1,x,z)*helper_phi(kx1,kz1,y);
+      break;
+
+    case 5:
+
+      func += helper_zeta(kx1,kz1,x,z)*helper_phi(kx1,kz1,y)
+           +  helper_zeta(kx2,kz2,x,z)*helper_phi(kx2,kz2,y)
+           +  helper_zeta(kx3,kz3,x,z)*helper_phi(kx3,kz3,y)
+           +  helper_zeta(kx4,kz4,x,z)*helper_phi(kx4,kz4,y)
+           +  helper_zeta(kx5,kz5,x,z)*helper_phi(kx5,kz5,y);
+      break;
+
+  }
+
+  return func;
+
+}
 
 // example of a private method, called from exact_t
 template <typename Scalar, typename Scalar2>
-Scalar helper_zeta(Scalar2 kx1, Scalar2 kz1, 
-                   Scalar2 kx2, Scalar2 kz2, 
-                   Scalar2 kx3, Scalar2 kz3, 
-                   Scalar2 kx4, Scalar2 kz4, 
-                   Scalar2 kx5, Scalar2 kz5,
-                   Scalar2 numModes, 
-                   Scalar x, Scalar z)
+Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
 {
-  Scalar func = 0.0;
-  
-  Scalar2 kx,kz;
-
-  int modes = int(numModes);
-
-  for (int i = 1; i <= modes; i++) {
-
-    switch(i) {
-      case 1:
-        kx = kx1;
-        kz = kz1;
-        break;
-      case 2:
-        kx = kx2;
-        kz = kz2;
-        break;
-      case 3:
-        kx = kx3;
-        kz = kz3;
-        break;
-      case 4:
-        kx = kx4;
-        kz = kz4;
-        break;
-      case 5:
-        kx = kx5;
-        kz = kz5;
-        break;
-    } 
-
-  func += 2*( std::cos(kx*x)*std::cos(kz*z) - std::sin(kx*x)*std::sin(kz*z)
-             -std::sin(kx*x)*std::cos(kz*z) - std::cos(kx*x)*std::sin(kz*z) );
-  }
-
+  Scalar func;
+  func = 2*( std::cos(kx*x)*std::cos(kz*z) - std::sin(kx*x)*std::sin(kz*z)
+            -std::sin(kx*x)*std::cos(kz*z) - std::cos(kx*x)*std::sin(kz*z) );
   return func;
 }
 
 template <typename Scalar, typename Scalar2>
-Scalar helper_psi(Scalar2 kx1, Scalar2 kz1, 
-                  Scalar2 kx2, Scalar2 kz2, 
-                  Scalar2 kx3, Scalar2 kz3, 
-                  Scalar2 kx4, Scalar2 kz4, 
-                  Scalar2 kx5, Scalar2 kz5,
-                  Scalar2 numModes, 
-                  Scalar y)
-{
-  Scalar func = 0.0;
-
-  Scalar2 kMag, kx, kz;
-
-  Scalar2 a_psi, c_psi, e_psi;
-  
-  int modes = int(numModes);
-
-  for (int i = 1; i <= modes; i++) {
-
-    switch(i) {
-      case 1:
-        kx = kx1;
-        kz = kz1;
-        break;
-      case 2:
-        kx = kx2;
-        kz = kz2;
-        break;
-      case 3:
-        kx = kx3;
-        kz = kz3;
-        break;
-      case 4:
-        kx = kx4;
-        kz = kz4;
-        break;
-      case 5:
-        kx = kx5;
-        kz = kz5;
-        break;
-    } 
-
-    kMag = sqrt(kx*kx+kz*kz);
- 
-    if ( kMag == 0. ) {
-      
-      a_psi = -1.0;
-      c_psi = 3.0;
-      e_psi = 0.0;
-  
-    } else {
-    
-      a_psi = - (kMag + 1.0)/2.0;
-      c_psi = 1.0 - a_psi;
-      e_psi = 1.0/2.0*(-2.0/kMag - 2.0/a_psi - c_psi);
-  
-    }
-  
-    func +=  1/4*a_psi*std::pow(y,Scalar(4.0))
-           + 1/2*c_psi*std::pow(y,Scalar(2.0))
-           + e_psi;
-  
-  }
-
-  return func;
-}
- 
-template <typename Scalar, typename Scalar2>
-Scalar helper_phi(Scalar2 kx1, Scalar2 kz1, 
-                  Scalar2 kx2, Scalar2 kz2, 
-                  Scalar2 kx3, Scalar2 kz3, 
-                  Scalar2 kx4, Scalar2 kz4, 
-                  Scalar2 kx5, Scalar2 kz5,
-                  Scalar2 numModes, 
-                  Scalar y)
+Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y)
 {
   Scalar func;
 
-  Scalar2 kx,kz,kMag;
+  Scalar2 kMag = std::sqrt(kx*kx + kz*kz);
+
+  Scalar2 a_psi, c_psi, e_psi;
+
+  if ( kMag == 0. ) {
+    
+    a_psi = -1.0;
+    c_psi = 3.0;
+    e_psi = 0.0;
+
+  } else {
+  
+    a_psi = - (kMag + 1.0)/2.0;
+    c_psi = 1.0 - a_psi;
+    e_psi = 1.0/2.0*(-2.0/kMag - 2.0/a_psi - c_psi);
+
+  }
+
+  func =   1/4*a_psi*std::pow(y,Scalar(4.0))
+         + 1/2*c_psi*std::pow(y,Scalar(2.0))
+         + e_psi;
+
+  return func;
+}
+ 
+template <typename Scalar, typename Scalar2>
+Scalar helper_phi(Scalar2 kx, Scalar2 kz, Scalar y)
+{
+  Scalar func;
+
+  Scalar2 kMag = std::sqrt(kx*kx + kz*kz);
 
   Scalar2 a_phi, b_phi;
 
-  int modes = int(numModes);
+  if ( kMag == 0. ) {
 
-  for (int i = 1; i <= modes; i++) {
+    return 0.0;
 
-    switch(i) {
-      case 1:
-        kx = kx1;
-        kz = kz1;
-        break;
-      case 2:
-        kx = kx2;
-        kz = kz2;
-        break;
-      case 3:
-        kx = kx3;
-        kz = kz3;
-        break;
-      case 4:
-        kx = kx4;
-        kz = kz4;
-        break;
-      case 5:
-        kx = kx5;
-        kz = kz5;
-        break;
-    } 
+  } else {
 
-    kMag = sqrt(kx*kx+kz*kz);
-    if ( kMag == 0. ) {
-
-      func += 0.0;
-
-    } else {
-
-      a_phi = -(2.0 + kMag)/(4.0 + kMag);
-      b_phi = -(8.0 + 3.0*kMag)/(3.0 + kMag) - a_phi*(kMag + 4.0)/(kMag + 3.0);
-
-    }
-
-    func +=   std::pow(y,Scalar(5.0))
-            + a_phi*std::pow(y,Scalar(4.0))
-            + b_phi*std::pow(y,Scalar(3.0))
-            + std::pow(y,Scalar(2.0))
-            + y;
+    a_phi = -(2.0 + kMag)/(4.0 + kMag);
+    b_phi = -(8.0 + 3.0*kMag)/(3.0 + kMag) - a_phi*(kMag + 4.0)/(kMag + 3.0);
 
   }
+
+  func =  std::pow(y,Scalar(5.0))
+         + a_phi*std::pow(y,Scalar(4.0))
+         + b_phi*std::pow(y,Scalar(3.0))
+         + std::pow(y,Scalar(2.0))
+         + y;
 
   return func;
 } 
@@ -691,19 +625,6 @@ Scalar helper_T(Scalar t)
   return func;
 }
 
-template <typename Scalar, typename Scalar2>
-Scalar helper_meanOnly(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
-{
-  Scalar func;
-
-  if ( (kx == 0.0) and (kz == 0.0) ) {
-    func = 1.0;
-  } else {
-    func = 0.0;
-  }
-
-  return func;
-}
 //template <typename Scalar>
 //Scalar helper_gt(Scalar y)
 ////Scalar MASA::navierstokes_3d_variabledensity<Scalar>::helper_gt(Scalar y)
@@ -724,7 +645,6 @@ Scalar helper_meanOnly(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
 
 //
 // main functions
-// 
 //
 // public method
 template <typename Scalar>
@@ -742,7 +662,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_1(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   Scalar exact_1;
-  exact_1 = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x1,z1) * helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1];
+  exact_1 = helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                           x,y,z).derivatives()[1];
+
   return exact_1 * helper_T(t1);
 }
 
@@ -762,8 +684,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_2(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   Scalar exact_2;
-  exact_2 = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-             - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0]) * helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y1);
+  exact_2 = ( helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                             x,y,z).derivatives()[2]
+            - helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                             x,y,z).derivatives()[0] );
+
   return exact_2 * helper_T(t1);
 }
 
@@ -783,7 +708,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_3(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   Scalar exact_3;
-  exact_3 = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x1,z1) * helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1];
+
+  exact_3 = -helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                           x,y,z).derivatives()[1];
+
   return exact_3 * helper_T(t1);
 }
 
@@ -803,8 +731,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_1(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   Scalar exact_1;
-  exact_1 = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] 
-            * helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y1);
+
+  exact_1 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                           x,y,z).derivatives()[0];
+
   return exact_1 * helper_T(t1);
 }
 
@@ -824,8 +754,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_2(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   Scalar exact_2;
-  exact_2 = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x1,z1) 
-            * helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1];
+
+  exact_2 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                           x,y,z).derivatives()[1];
+
   return exact_2 * helper_T(t1);
 }
 
@@ -845,8 +777,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_3(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   Scalar exact_3;
-  exact_3 = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2]
-            * helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y1);
+
+  exact_3 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                           x,y,z).derivatives()[2];
+
   return exact_3 * helper_T(t1);
 }
 
@@ -925,7 +859,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
 
   Scalar exact_rho;
 
-  exact_rho = helper_alpha(y1);//*helper_meanOnly(kx,kz,x1,z1);//helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x1,z1) * helper_alpha(y1);// * helper_T(t1);
+  exact_rho = helper_alpha(y1);//helper_zeta(kx,kz,x1,z1) * helper_alpha(y1);// * helper_T(t1);
 
   return exact_rho;
 }
@@ -946,7 +880,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mu(Scalar x1,
 
   Scalar exact_mu;
 
-  exact_mu = helper_beta(y1);//*helper_meanOnly(kx,kz,x1,z1); //helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x1,z1) * helper_beta(y1);// * helper_T(t1);
+  exact_mu = helper_beta(y1); //helper_zeta(kx,kz,x1,z1) * helper_beta(y1);// * helper_T(t1);
 
   return exact_mu;
 }
@@ -969,13 +903,16 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_omega(Scalar x1
 
   // Omega = d m_1^d / dz - d m_3^d / dx
 
-  Scalar omega = 
-        // d m_1^d / dz
-    raw_value( helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1) )
-    -   // d m_3^d / dz
-    raw_value(-helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1) );
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+
+                  // d m_1^d / dz
+  Scalar omega =  raw_value( (zetaPhi.derivatives()[1]).derivatives()[2] 
+                                                      *helper_T(t1) )
+                - // d m_3^d / dx
+                  raw_value(-(zetaPhi.derivatives()[1]).derivatives()[0]
+                                                      *helper_T(t1) );
 
   return omega;
 }
@@ -997,25 +934,15 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_phi(Scalar x1,
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
 
   // phi = lap( m_2^d ) 
+ 
+  ADScalar m2_D = 
+    ( helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                     x,y,z).derivatives()[2] 
+    - 
+      helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                     x,y,z).derivatives()[0] ) * helper_T(t1);
 
-  ADScalar phi = 
-        // d^2 m_2^d / dx^2
-    (  ((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2])
-                                .derivatives()[0]).derivatives()[0] 
-      -((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0])
-                                .derivatives()[0]).derivatives()[0]) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1) +
-        // d^2 m_2^d / dy^2
-    (   helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2]
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-       (helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1]).derivatives()[1] * 
-        helper_T(t1) +
-        // d^2 m_2^d / dz^2
-    (  ((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2])
-                               .derivatives()[2]).derivatives()[2] 
-      -((helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0])
-                                .derivatives()[2]).derivatives()[2]) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
+  ADScalar phi = divergence(gradient(m2_D)); 
 
   return raw_value(phi);
 
@@ -1036,30 +963,30 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
+  //
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mD[0] =  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
-  mD[1] = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
-  mD[2] = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_beta(y);// * helper_T(t1); 
+  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
   // get DivCij
 
-  NumberVector<NDIM, ADScalar> DivC = -divergence(rho*U.outerproduct(U));
+  NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
+
 
   // get DivTauij
 
@@ -1070,19 +997,19 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
         mu * (gradient(U) + transpose(gradient(U)) 
               - 2./3. * divergence(U)*I) );
 
-  // Omega equation residuals
-  Scalar RHS_omega = 
-    raw_value( 0.
-                // Convective part
-  //              DivC[0].derivatives()[2] 
-  //            - DivC[2].derivatives()[0]
-                // Viscous part
+  Scalar RHS_omega =
+    raw_value(
+               // Convective part
+                DivC[0].derivatives()[2]
+              - DivC[2].derivatives()[0]
+               // Viscous part
               + 1./re*DivTau[0].derivatives()[2]
               - 1./re*DivTau[2].derivatives()[0]
-              
-              );
+
+             );
 
   return RHS_omega;
+
 }
 
 template <typename Scalar>
@@ -1100,30 +1027,30 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
+  //
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mD[0] =  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
-  mD[1] = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
-  mD[2] = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_beta(y);// * helper_T(t1); 
+  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
   // get DivCij
 
   NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
+
 
   // get DivTauij
 
@@ -1139,20 +1066,21 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
   ADScalar DivDivC   = divergence(DivC);
   ADScalar DivDivTau = divergence(DivTau);
 
-  // phi equation residual
+  // phi RHS
   Scalar RHS_phi = 
     raw_value(
                 // Convective part
                 divergence(gradient(DivC[1]))
               - DivDivC.derivatives()[1]
-              +  
+              +
                 // Viscous part
                 1./re*divergence(gradient(DivTau[1]))
               - 1./re*DivDivTau.derivatives()[1]
 
-              );
+             );
 
   return RHS_phi;
+
 }
 
 template <typename Scalar>
@@ -1170,24 +1098,23 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, S
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
+  //
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mD[0] =  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
-  mD[1] = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
-  mD[2] = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//*helper_meanOnly(kx,kz,x1,z1); //helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) * helper_beta(y);// * helper_T(t1); 
+  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -1218,174 +1145,53 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
+  //
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
 
-  mD[0] =  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
-  mD[1] = (  helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] 
-           - helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] ) * 
-          helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1);
-  mD[2] = -helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-           helper_phi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1);
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
-  mC[0] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[0] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
-  mC[1] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y).derivatives()[1] * helper_T(t1); 
-  mC[2] = helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z).derivatives()[2] *
-          helper_psi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,y) * helper_T(t1); 
+  mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//*helper_meanOnly(kx,kz,x1,z1);// * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//*helper_meanOnly(kx,kz,x1,z1); //helper_zeta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,z) * helper_beta(y);// * helper_T(t1); 
+  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
   // get Cij
-
+  
   NumberVector<NDIM, NumberVector<NDIM,ADScalar> > C = -rho*U.outerproduct(U);
 
-  Scalar Cval = 0.;
+  Scalar Cval = 0;
 
-  switch(i)
+  switch (i)
   {
     case 1:
       Cval = raw_value(C[0][0] - C[1][1]);
       break;
-
     case 2:
       Cval = raw_value(C[2][2] - C[1][1]);
       break;
-
     case 3:
       Cval = raw_value(C[0][1]);
       break;
-
     case 4:
       Cval = raw_value(C[0][2]);
       break;
-
     case 5:
       Cval = raw_value(C[1][2]);
       break;
-
   }
 
   return Cval;
 
 }
-//template <typename Scalar>
-//NumberVector<NDIM-1, NumberVector<NDIM-1,Scalar> > 
-//  MASA::navierstokes_3d_variabledensity<Scalar>::Cij(Scalar x, 
-//                                                     Scalar y, 
-//                                                     Scalar z,
-//                                                     Scalar t)
-//{ 
-//  NumberVector<NDIM-1, NumberVector<NDIM-1,Scalar> > Cij;
-//
-//  Scalar m1,m2,m3,rho;
-//
-//  rho = eval_exact_rho(x,y,z,t);
-//  m1  = eval_exact_mD_1(x,y,z,t) + eval_exact_mC_1(x,y,z,t);
-//  m2  = eval_exact_mD_2(x,y,z,t) + eval_exact_mC_2(x,y,z,t);
-//  m3  = eval_exact_mD_3(x,y,z,t) + eval_exact_mC_3(x,y,z,t);
-//
-//  Cij[0][0] = -m1*m1/rho;
-//  Cij[1][0] = -m2*m1/rho;
-//  Cij[2][0] = -m3*m1/rho;
-//  Cij[1][1] = -m2*m2/rho;
-//  Cij[1][2] = -m2*m3/rho;
-//  Cij[2][2] = -m3*m3/rho;
-//
-//  Cij[2][1] = Cij[1][2];
-//  Cij[0][1] = Cij[1][0]
-//  Cij[0][2] = Cij[2][0];
-//
-//  return Cij;
-//
-//}
-
-//template <typename Scalar>
-//NumberVector<NDIM-1, Scalar> 
-//  MASA::navierstokes_3d_variabledensity<Scalar>::DivTauij(Scalar x1, 
-//                                                          Scalar y1, 
-//                                                          Scalar z1,
-//                                                          Scalar t)
-//{ 
-//  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
-//  typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
-//  typedef SecondDerivType ADScalar;
-//
-//  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
-//  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-//  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
-//
-//  NumberVector<NDIM-1, NumberVector<NDIM-1,ADScalar> > Tij;
-//
-//  NumberVector<NDIM-1, NumberVector<NDIM-1,Scalar> > I = 
-//    NumberVector<NDIM-1, Scalar>::identity;
-//
-//  NumberVector<NDIM-1, ADScalar> U;
-//
-//  ADScalar mu, rho;
-//
-//  mu    = eval_exact_mu(x,y,z,t);
-//  rho   = eval_exact_rho(x,y,z,t);
-//  U[0]  = (eval_exact_mD_1(x,y,z,t) + eval_exact_mC_1(x,y,z,t))/rho;
-//  U[1]  = (eval_exact_mD_2(x,y,z,t) + eval_exact_mC_2(x,y,z,t))/rho;
-//  U[2]  = (eval_exact_mD_3(x,y,z,t) + eval_exact_mC_3(x,y,z,t))/rho;
-//
-//  Tij = mu*(gradient(U) + transpose(gradient(U))) - 2./3.*mu*divergence(U)*I;
-//  
-//  return raw_value(divergence(Tij));
-//
-//}
-// example of a public method called from eval_exact_t
-//template <typename Scalar>
-//Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_u(Scalar x, Scalar y1, Scalar z1)
-//{
-//  typedef DualNumber<Scalar, Scalar> OneDDerivType;
-//  OneDDerivType y = OneDDerivType(y1,1);
-//  OneDDerivType z = OneDDerivType(z1,1);
-//
-//  Scalar exact_u;
-//  exact_u =   a *  helper_f(beta,kx,x) * helper_g(y).derivatives() *  helper_h(gamma,kz,z).derivatives();
-//  return exact_u;
-//}
-//
-//// public method
-//template <typename Scalar>
-//Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_v(Scalar x1, Scalar y, Scalar z1)
-//{
-//  typedef DualNumber<Scalar, Scalar> OneDDerivType;
-//  OneDDerivType x = OneDDerivType(x1,1);
-//  OneDDerivType z = OneDDerivType(z1,1);
-//
-//  Scalar exact_v;
-//  exact_v = b * helper_f(beta,kx,x).derivatives() *  helper_g(y) * helper_h(gamma,kz,z).derivatives();
-//  return exact_v;
-//}
-//
-//// public method
-//template <typename Scalar>
-//Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_w(Scalar x1, Scalar y1, Scalar z)
-//{
-//  typedef DualNumber<Scalar, Scalar> OneDDerivType;
-//  OneDDerivType x = OneDDerivType(x1,1);
-//  OneDDerivType y = OneDDerivType(y1,1);
-//
-//  Scalar exact_w;
-//  exact_w = c * helper_f(beta,kx,x).derivatives() * helper_g(y).derivatives() *  helper_h(gamma,kz,z);
-//  return exact_w;
-//}
-//
-//// public method
-//template <typename Scalar>
-//Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_p(Scalar x, Scalar y, Scalar z)
-//{
-//  Scalar P = d *  helper_f(beta,kx,x) * helper_gt(y) *  helper_h(gamma,kz,z);
-//  return P;
-//}
-
-
 // ----------------------------------------
 // Template Instantiation(s)
 // ----------------------------------------

@@ -2417,7 +2417,6 @@ private:
   Scalar kz3;
   Scalar kz4;
   Scalar kz5;
-  Scalar kMag;
 
 public:
   navierstokes_3d_variabledensity();
