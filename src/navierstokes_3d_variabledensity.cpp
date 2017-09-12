@@ -144,7 +144,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
   typedef D4TimeType ADTimeScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, ADScalar> U,mD,mC;
+  //NumberVector<NDIM, ADScalar> U,mD,mC;
+  NumberVector<NDIM, D3Type> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -165,8 +166,13 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+  D3Type y3 = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+
+  D3Type rho = helper_alpha(y3); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  D3Type mu  = helper_beta(y3); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+
+//  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+//  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -186,7 +192,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
  
   // Omega = d m_1^d / dz - d m_3^d / dx
 
-  ADTimeScalar omega = 
+  //ADTimeScalar omega = 
+  D2TimeType omega =
         // d m_1^d / dz
         zetaPhiTime.derivatives()[1].derivatives()[2]
     +
@@ -195,13 +202,15 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
 
   // get DivCij
 
-  NumberVector<NDIM, ADScalar> DivC = -divergence(rho*U.outerproduct(U));
+  //NumberVector<NDIM, ADScalar> DivC = -divergence(rho*U.outerproduct(U));
+  NumberVector<NDIM, D2Type> DivC = -divergence(rho*U.outerproduct(U));
 
   // get DivTauij
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
-  NumberVector<NDIM, ADScalar> DivTau = 
+  //NumberVector<NDIM, ADScalar> DivTau = 
+  NumberVector<NDIM, D2Type> DivTau = 
     divergence(
         mu * (gradient(U) + transpose(gradient(U)) 
               - 2./3. * divergence(U)*I) );
@@ -244,7 +253,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
   typedef D5TimeType ADTimeScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, ADScalar> U,mD,mC;
+  //NumberVector<NDIM, ADScalar> U,mD,mC;
+  NumberVector<NDIM, D4Type> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -266,8 +276,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y);//helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y);//helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+  D4Type y4 = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  D4Type rho = helper_alpha(y4);//helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  D4Type mu  = helper_beta(y4);//helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+
+//  ADScalar rho = helper_alpha(y);//helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+//  ADScalar mu  = helper_beta(y);//helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -282,36 +296,45 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
   // phi = lap( m_2^d ) 
+   
+  ADTimeScalar zetaPhiTime = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   xt,yt,zt)*helper_T(tt);
 
-  ADTimeScalar m2_D = 
-    ( helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                     xt,yt,zt).derivatives()[2] 
+  //ADTimeScalar m2_D = 
+  D4TimeType m2_D =
+      zetaPhiTime.derivatives()[2] 
     - 
-      helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                     xt,yt,zt).derivatives()[0] ) * helper_T(tt);
+      zetaPhiTime.derivatives()[0];
 
-  ADTimeScalar phi = 
+  //ADTimeScalar phi = 
+  D2TimeType phi = 
           m2_D.derivatives()[0].derivatives()[0]
         + m2_D.derivatives()[1].derivatives()[1]
         + m2_D.derivatives()[2].derivatives()[2];
 
   // get DivCij
 
-  NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
+  //NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
+  NumberVector<NDIM, D3Type > DivC = -divergence(rho*U.outerproduct(U));
 
   // get DivTauij
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
-  NumberVector<NDIM, ADScalar> DivTau = 
+  //NumberVector<NDIM, ADScalar> DivTau = 
+  NumberVector<NDIM, D3Type> DivTau = 
     divergence(
         mu * (gradient(U) + transpose(gradient(U)) 
               - 2./3. * divergence(U)*I) );
 
   // get divergences
+  
+  D2Type DivDivC   = divergence(DivC);
+  D2Type DivDivTau = divergence(DivTau);
 
-  ADScalar DivDivC   = divergence(DivC);
-  ADScalar DivDivTau = divergence(DivTau);
+//  ADScalar DivDivC   = divergence(DivC);
+//  ADScalar DivDivTau = divergence(DivTau);
 
   // phi equation residual
   Scalar Q_phi = 
@@ -340,16 +363,19 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
   typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
   typedef DualNumber<D3Type, NumberVector<NDIM, D3Type> > D4Type;
-  typedef D4Type ADScalar;
+  //typedef D4Type ADScalar;
+  typedef D2Type ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
   typedef DualNumber<D1TimeType, NumberVector<NDIM+1, D1TimeType> > D2TimeType;
   typedef DualNumber<D2TimeType, NumberVector<NDIM+1, D2TimeType> > D3TimeType;
   typedef DualNumber<D3TimeType, NumberVector<NDIM+1, D3TimeType> > D4TimeType;
-  typedef D4TimeType ADTimeScalar;
+  //typedef D4TimeType ADTimeScalar;
+  typedef D1TimeType ADTimeScalar;
 
   // Treat momentum as a vector
-  NumberVector<NDIM, ADScalar> mC;
+  //NumberVector<NDIM, ADScalar> mC;
+  NumberVector<NDIM, D1Type> mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -377,12 +403,14 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
 
   // Rho equation residuals
   Scalar Q_rho = 
-    raw_value(  
+    //raw_value(  
                 // Temporal part
                 rho.derivatives()[3]
 
-        ) +
-    raw_value(
+        //) 
+        +
+    //raw_value
+    (
                 // Div mC
                 divergence(mC)
 
