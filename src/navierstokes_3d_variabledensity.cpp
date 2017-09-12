@@ -134,12 +134,14 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > FirstDerivTimeType;
   typedef DualNumber<FirstDerivTimeType, NumberVector<NDIM+1, FirstDerivTimeType> > SecondDerivTimeType;
   typedef DualNumber<SecondDerivTimeType, NumberVector<NDIM+1, SecondDerivTimeType> > ThirdDerivTimeType;
-  typedef ThirdDerivTimeType ADTimeScalar;
+  typedef DualNumber<ThirdDerivTimeType, NumberVector<NDIM+1, ThirdDerivTimeType> > FourthDerivTimeType;
+  typedef FourthDerivTimeType ADTimeScalar;
 
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
@@ -227,13 +229,14 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > FirstDerivTimeType;
   typedef DualNumber<FirstDerivTimeType, NumberVector<NDIM+1, FirstDerivTimeType> > SecondDerivTimeType;
   typedef DualNumber<SecondDerivTimeType, NumberVector<NDIM+1, SecondDerivTimeType> > ThirdDerivTimeType;
-  typedef ThirdDerivTimeType ADTimeScalar;
-
+  typedef DualNumber<ThirdDerivTimeType, NumberVector<NDIM+1, ThirdDerivTimeType> > FourthDerivTimeType;
+  typedef FourthDerivTimeType ADTimeScalar;
 
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
@@ -331,13 +334,14 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > FirstDerivTimeType;
   typedef DualNumber<FirstDerivTimeType, NumberVector<NDIM+1, FirstDerivTimeType> > SecondDerivTimeType;
   typedef DualNumber<SecondDerivTimeType, NumberVector<NDIM+1, SecondDerivTimeType> > ThirdDerivTimeType;
-  typedef ThirdDerivTimeType ADTimeScalar;
-
+  typedef DualNumber<ThirdDerivTimeType, NumberVector<NDIM+1, ThirdDerivTimeType> > FourthDerivTimeType;
+  typedef FourthDerivTimeType ADTimeScalar;
 
   // Treat momentum as a vector
   NumberVector<NDIM, ADScalar> mC;
@@ -602,7 +606,7 @@ template <typename Scalar>
 Scalar helper_alpha(Scalar y)
 {
   Scalar func;
-  func = 2.0 - std::pow(y,Scalar(4.0));
+  func = 2.0;// - std::pow(y,Scalar(4.0));
 
   return func;
 }
@@ -611,7 +615,7 @@ template <typename Scalar>
 Scalar helper_beta(Scalar y)
 {
   Scalar func;
-  func = 2.0 - std::pow(y,Scalar(2.0));
+  func = 2.0;// - std::pow(y,Scalar(2.0));
 
   return func;
 }
@@ -894,7 +898,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_omega(Scalar x1
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -926,7 +931,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_phi(Scalar x1,
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -954,7 +960,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
@@ -986,7 +993,6 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
   // get DivCij
 
   NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
-
 
   // get DivTauij
 
@@ -1018,14 +1024,20 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef DualNumber<FourthDerivType, NumberVector<NDIM, FourthDerivType> > FifthDerivType;
+  typedef FifthDerivType ADScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, ADScalar> U,mD,mC;
-
-  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
-  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  //NumberVector<NDIM, ADScalar> U,mD,mC;
+  NumberVector<NDIM, FourthDerivType> U,mD,mC;
+  FirstDerivType x = FirstDerivType(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  FirstDerivType y = FirstDerivType(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  FirstDerivType z = FirstDerivType(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+ 
+//  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+//  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+//  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
   //ADScalar t = ADScalar(t1,NumberVectorUnitVector<NDIM, 3, Scalar>::value());
   //
   ADScalar zetaPhi = 
@@ -1042,29 +1054,35 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
-  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+//  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+//  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+  SecondDerivType rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  SecondDerivType mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
   // get DivCij
 
-  NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
-
+  //NumberVector<NDIM, ADScalar > DivC = -divergence(rho*U.outerproduct(U));
+  NumberVector<NDIM, ThirdDerivType > DivC = -divergence(rho*U.outerproduct(U));
 
   // get DivTauij
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
-  NumberVector<NDIM, ADScalar> DivTau = 
+  //NumberVector<NDIM, ADScalar> DivTau = 
+  NumberVector<NDIM, ThirdDerivType> DivTau = 
     divergence(
         mu * (gradient(U) + transpose(gradient(U)) 
               - 2./3. * divergence(U)*I) );
 
   // get divergences
 
-  ADScalar DivDivC   = divergence(DivC);
-  ADScalar DivDivTau = divergence(DivTau);
+//  ADScalar DivDivC   = divergence(DivC);
+//  ADScalar DivDivTau = divergence(DivTau);
+  SecondDerivType DivDivC   = divergence(DivC);
+  SecondDerivType DivDivTau = divergence(DivTau);
+
 
   // phi RHS
   Scalar RHS_phi = 
@@ -1089,7 +1107,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, S
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
@@ -1136,7 +1155,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > FirstDerivType;
   typedef DualNumber<FirstDerivType, NumberVector<NDIM, FirstDerivType> > SecondDerivType;
   typedef DualNumber<SecondDerivType, NumberVector<NDIM, SecondDerivType> > ThirdDerivType;
-  typedef ThirdDerivType ADScalar;
+  typedef DualNumber<ThirdDerivType, NumberVector<NDIM, ThirdDerivType> > FourthDerivType;
+  typedef FourthDerivType ADScalar;
 
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
