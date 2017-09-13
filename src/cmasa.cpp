@@ -290,6 +290,8 @@ extern "C" double masa_eval_4d_grad_rho (double x,double y,double z,double t,int
 //
 extern "C" double masa_eval_4d_source_phi    (double x,double y,double z,double t){return(masa_eval_source_phi    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_omega  (double x,double y,double z,double t){return(masa_eval_source_omega  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_m1  (double x,double y,double z,double t){return(masa_eval_source_m1  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_m3  (double x,double y,double z,double t){return(masa_eval_source_m3  <double>(x,y,z,t));}
 
 extern "C" double masa_eval_4d_exact_mD_1     (double x,double y,double z,double t){return(masa_eval_exact_mD_1 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mD_2     (double x,double y,double z,double t){return(masa_eval_exact_mD_2 <double>  (x,y,z,t));}

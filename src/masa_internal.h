@@ -272,6 +272,10 @@ namespace MASA
     // MY STUFF
     virtual Scalar eval_q_phi(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (phi) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (omega) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m1) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m3) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+ 
+ 
   /*
    * -------------------------------------------------------------------------------------------
    *
@@ -2424,6 +2428,8 @@ public:
   Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_phi  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_rho  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar);
 //  Scalar eval_q_u(Scalar,Scalar,Scalar);
 //  Scalar eval_q_v(Scalar,Scalar,Scalar);
 //  Scalar eval_q_w(Scalar,Scalar,Scalar);

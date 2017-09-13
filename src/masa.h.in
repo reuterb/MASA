@@ -448,10 +448,16 @@ namespace MASA
   Scalar masa_eval_source_rho_e(Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
-  Scalar masa_eval_source_omega  (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+  Scalar masa_eval_source_omega (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
-  Scalar masa_eval_source_phi    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+  Scalar masa_eval_source_phi   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_source_m1    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_source_m3    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   // --------------------------------
   // manufactured analytical solution -- 4D
