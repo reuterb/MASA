@@ -386,6 +386,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
                 divergence(mC);
 
   return Q_rho;
+
 }
 
 template <typename Scalar>
@@ -631,8 +632,8 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
 {
   Scalar func;
-  func = 2*( std::cos(kx*x)*std::cos(kz*z) - std::sin(kx*x)*std::sin(kz*z)
-            -std::sin(kx*x)*std::cos(kz*z) - std::cos(kx*x)*std::sin(kz*z) );
+  func = 2.*( std::cos(kx*x)*std::cos(kz*z) - std::sin(kx*x)*std::sin(kz*z)
+             -std::sin(kx*x)*std::cos(kz*z) - std::cos(kx*x)*std::sin(kz*z) );
   return func;
 }
 
@@ -659,8 +660,8 @@ Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y)
 
   }
 
-  func =   1/4*a_psi*std::pow(y,Scalar(4.0))
-         + 1/2*c_psi*std::pow(y,Scalar(2.0))
+  func =   1.0/4.0*a_psi*std::pow(y,Scalar(4.0))
+         + 1.0/2.0*c_psi*std::pow(y,Scalar(2.0))
          + e_psi;
 
   return func;
