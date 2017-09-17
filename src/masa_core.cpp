@@ -1047,6 +1047,18 @@ Scalar MASA::masa_eval_source_m3(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_q_m3(x,y,z,t);
 }
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_top(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_top(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_bottom(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_bottom(x,y,z,t);
+}
   // --------------------------------
   // analytical terms
   // --------------------------------
@@ -1268,6 +1280,12 @@ template <typename Scalar>
 Scalar MASA::masa_eval_exact_mC_3(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_exact_mC_3(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_div_mC(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_div_mC(x,y,z,t);
 }
 
 template <typename Scalar>
@@ -1526,6 +1544,8 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_bottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
@@ -1535,6 +1555,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_exact_mC_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_div_mC<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_RHSomega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_RHSphi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_grad_DivTau<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \

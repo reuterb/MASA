@@ -459,6 +459,13 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_source_m3    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
+  template <typename Scalar>
+  Scalar masa_eval_source_top    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_source_bottom    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+
   // --------------------------------
   // manufactured analytical solution -- 4D
   // --------------------------------
@@ -498,6 +505,9 @@ namespace MASA
 
   template <typename Scalar>
   Scalar masa_eval_exact_mC_3      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_exact_div_mC      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
   Scalar masa_eval_exact_mu        (Scalar,Scalar,Scalar,Scalar); // x,y,z,t

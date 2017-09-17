@@ -1066,6 +1066,48 @@ module masa
      end function masa_eval_4d_source_m3
   end interface
 
+  interface
+     !> Evaluates the 'four' dimensional source term for top BC.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the source term.
+     !!
+     real (c_double) function masa_eval_4d_source_top(x,y,z,t) bind (C,name='masa_eval_4d_source_top')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+     end function masa_eval_4d_source_top
+  end interface
+
+  interface
+     !> Evaluates the 'four' dimensional source term for bottom BC.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the source term.
+     !!
+     real (c_double) function masa_eval_4d_source_bottom(x,y,z,t) bind (C,name='masa_eval_4d_source_bottom')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+     end function masa_eval_4d_source_bottom
+  end interface
+
   ! ---------------------------------
   ! MMS analytical term interfaces -- 1d
   ! ---------------------------------
@@ -1714,6 +1756,28 @@ module masa
        real (c_double), value :: t
 
     end function masa_eval_4d_exact_mC_3
+  end interface
+
+  interface
+     !> Evaluates the 'four' dimensional exact solution of the
+     !! divergence of the curl-free momentum.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the exact solution.
+     !!
+     real (c_double) function masa_eval_4d_exact_div_mC(x,y,z,t) bind (C,name='masa_eval_4d_exact_div_mC')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+    end function masa_eval_4d_exact_div_mC
   end interface
 
   interface
