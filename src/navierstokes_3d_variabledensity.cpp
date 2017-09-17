@@ -51,10 +51,17 @@ Scalar helper_zetaPsi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                       Scalar x, Scalar y, Scalar z);
 
 template <typename Scalar, typename Scalar2>
+Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                           Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                           Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                           Scalar x, Scalar y, Scalar z, bool m3Flag);
+
+
+template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                             Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                             Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
-                            Scalar x, Scalar y, Scalar z);
+                            Scalar x, Scalar y, Scalar z, bool m3Flag);
 
 template <typename Scalar>
 Scalar helper_alpha(Scalar y);
@@ -572,25 +579,36 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_top(Scalar x1, Scal
   typedef D2Type ADScalar;
 
   // Treat momentum as a vector
-  NumberVector<NDIM, D1Type> mC;
+  NumberVector<NDIM, D1Type> mC_m1, mC_m3;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar zetaPsi = 
-    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+  ADScalar zetaPsi_m1 = 
+    helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                        x,y,z,false);
 
-  ADScalar zetaPsiTimesK = 
+  ADScalar zetaPsi_m3 = 
+    helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                        x,y,z,true);
+
+  ADScalar zetaPsiTimesK_m3 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                        x,y,z);
+                         x,y,z,true);
 
-  mC = gradient(zetaPsi)*helper_T(t1);
+  ADScalar zetaPsiTimesK_m1 = 
+    helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                         x,y,z,false);
+
+  mC_m1 = gradient(zetaPsi_m1)*helper_T(t1);
+  mC_m3 = gradient(zetaPsi_m3)*helper_T(t1);
 
   // BC residuals
-  Scalar Q_top = raw_value(zetaPsiTimesK.derivatives()[2])*helper_T(t1)
-    + mC[1].derivatives()[2]; 
+  Scalar Q_top = raw_value(zetaPsiTimesK_m3.derivatives()[2])*helper_T(t1)
+               + raw_value(zetaPsiTimesK_m1.derivatives()[0])*helper_T(t1)
+       + mC_m1[1].derivatives()[0] 
+       + mC_m3[1].derivatives()[2]; 
 
   return Q_top;
 
@@ -605,29 +623,41 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_bottom(Scalar x1, S
   typedef D2Type ADScalar;
 
   // Treat momentum as a vector
-  NumberVector<NDIM, D1Type> mC;
+  NumberVector<NDIM, D1Type> mC_m1, mC_m3;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar zetaPsi = 
-    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+  ADScalar zetaPsi_m1 = 
+    helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                        x,y,z,false);
 
-  ADScalar zetaPsiTimesK = 
+  ADScalar zetaPsi_m3 = 
+    helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                        x,y,z,true);
+
+  ADScalar zetaPsiTimesK_m3 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                        x,y,z);
+                         x,y,z,true);
 
-  mC = gradient(zetaPsi)*helper_T(t1);
+  ADScalar zetaPsiTimesK_m1 = 
+    helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                         x,y,z,false);
+
+  mC_m1 = gradient(zetaPsi_m1)*helper_T(t1);
+  mC_m3 = gradient(zetaPsi_m3)*helper_T(t1);
 
   // BC residuals
-  Scalar Q_bottom = raw_value(zetaPsiTimesK.derivatives()[2])*helper_T(t1)
-    - mC[1].derivatives()[2]; 
+  Scalar Q_bottom = raw_value(zetaPsiTimesK_m3.derivatives()[2])*helper_T(t1)
+                  + raw_value(zetaPsiTimesK_m1.derivatives()[0])*helper_T(t1)
+       - mC_m1[1].derivatives()[0] 
+       - mC_m3[1].derivatives()[2]; 
 
   return Q_bottom;
 
 }
+
 // ----------------------------------------
 // Analytical Terms
 // ----------------------------------------
@@ -636,33 +666,211 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
-                           Scalar x, Scalar y, Scalar z)
+                           Scalar x, Scalar y, Scalar z, bool m3Flag)
 {
   Scalar func = 0.0;
 
   int modes = int(numModes);
 
-  switch (modes) {
+  if (m3Flag == true) {
 
-    case 1:
-     
-      func += (std::sqrt(kx1*kx1 + kz1*kz1))
-              *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
-      break;
+    // If were nabbing m3, we want to ignore the case with kz = 0 and
+    // kx = anything but zero
 
-    case 5:
+    if ( ! ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx1*kx1 + kz1*kz1))
+                  *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+        }
 
-      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y)*
-              std::sqrt(kx1*kx1 + kz1*kz1)
-           +  helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y)*
-              std::sqrt(kx2*kx2 + kz2*kz2)
-           +  helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y)*
-              std::sqrt(kx3*kx3 + kz3*kz3)
-           +  helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y)*
-              std::sqrt(kx4*kx4 + kz4*kz4)
-           +  helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y)*
-              std::sqrt(kx5*kx5 + kz5*kz5);
-      break;
+    switch (modes) {
+  
+      case 1:
+
+        // done!
+
+        break;
+  
+      case 5:
+
+         if ( ! ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx2*kx2 + kz2*kz2))
+                  *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+        }   
+
+         if ( ! ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx3*kx3 + kz3*kz3))
+                  *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+        }   
+
+        if ( ! ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx4*kx4 + kz1*kz4))
+                  *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+        }   
+
+        if ( ! ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx5*kx5 + kz5*kz5))
+                  *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+        }   
+
+        break;
+  
+    }
+  
+  } else {
+    
+    // ONLY if kz = 0 and kx is non-zero do we solve for m1 instead
+    
+    if ( ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx1*kx1 + kz1*kz1))
+                  *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+        }
+
+    switch (modes) {
+  
+      case 1:
+
+        // done!
+
+        break;
+  
+      case 5:
+
+         if ( ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx2*kx2 + kz2*kz2))
+                  *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+        }   
+
+         if ( ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx3*kx3 + kz3*kz3))
+                  *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+        }   
+
+        if ( ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx4*kx4 + kz1*kz4))
+                  *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+        }   
+
+        if ( ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
+  
+          func += (std::sqrt(kx5*kx5 + kz5*kz5))
+                  *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+        }   
+
+        break;
+  
+    }
+
+  }
+
+  return func;
+
+}
+
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                      Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                      Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar x, Scalar y, Scalar z, bool m3Flag)
+{
+
+  Scalar func = 0.0;
+
+  int modes = int(numModes);
+  if (m3Flag == true) {
+
+    // If were nabbing m3, we want to ignore the case with kz = 0 and
+    // kx = anything but zero
+
+    if ( ! ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+        }
+
+    switch (modes) {
+  
+      case 1:
+
+        // done!
+
+        break;
+  
+      case 5:
+
+         if ( ! ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+        }   
+
+         if ( ! ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+        }   
+
+        if ( ! ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+        }   
+
+        if ( ! ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+        }   
+
+        break;
+  
+    }
+  
+  } else {
+    
+    // ONLY if kz = 0 and kx is non-zero do we solve for m1 instead
+    
+    if ( ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+        }
+
+    switch (modes) {
+  
+      case 1:
+
+        // done!
+
+        break;
+  
+      case 5:
+
+         if ( ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+        }   
+
+         if ( ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+        }   
+
+        if ( ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+        }   
+
+        if ( ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
+  
+          func += helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+        }   
+
+        break;
+  
+    }
 
   }
 
