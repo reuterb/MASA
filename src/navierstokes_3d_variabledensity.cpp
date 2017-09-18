@@ -61,7 +61,7 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                             Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                             Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
-                            Scalar x, Scalar y, Scalar z, bool m3Flag);
+                            Scalar x, Scalar y, Scalar z, int BCswitch);
 
 template <typename Scalar>
 Scalar helper_alpha(Scalar y);
@@ -595,11 +595,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_top(Scalar x1, Scal
 
   ADScalar zetaPsiTimesK_m3 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,true);
+                         x,y,z,1);
 
   ADScalar zetaPsiTimesK_m1 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,false);
+                         x,y,z,2);
 
   mC_m1 = gradient(zetaPsi_m1)*helper_T(t1);
   mC_m3 = gradient(zetaPsi_m3)*helper_T(t1);
@@ -639,11 +639,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_bottom(Scalar x1, S
 
   ADScalar zetaPsiTimesK_m3 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,true);
+                         x,y,z,1);
 
   ADScalar zetaPsiTimesK_m1 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,false);
+                         x,y,z,2);
 
   mC_m1 = gradient(zetaPsi_m1)*helper_T(t1);
   mC_m3 = gradient(zetaPsi_m3)*helper_T(t1);
@@ -658,6 +658,72 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_bottom(Scalar x1, S
 
 }
 
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiTop(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
+  typedef D2Type ADScalar;
+
+  // Treat momentum as a vector
+  NumberVector<NDIM, D1Type> mC;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+
+  ADScalar zetaPsiTimesK = 
+    helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                         x,y,z,3);
+
+  mC = gradient(zetaPsi)*helper_T(t1);
+
+  // BC residuals
+  Scalar Q_top = raw_value(zetaPsiTimesK.derivatives()[1])*helper_T(t1)
+       + mC[1].derivatives()[1];
+
+  return Q_top;
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiBottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
+  typedef D2Type ADScalar;
+
+  // Treat momentum as a vector
+  NumberVector<NDIM, D1Type> mC;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   x,y,z);
+
+  ADScalar zetaPsiTimesK = 
+    helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                         x,y,z,3);
+
+  mC = gradient(zetaPsi)*helper_T(t1);
+
+  // BC residuals
+  Scalar Q_bottom = raw_value(zetaPsiTimesK.derivatives()[1])*helper_T(t1)
+       - mC[1].derivatives()[1];
+
+  return Q_bottom;
+
+}
+
 // ----------------------------------------
 // Analytical Terms
 // ----------------------------------------
@@ -666,13 +732,13 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
-                           Scalar x, Scalar y, Scalar z, bool m3Flag)
+                           Scalar x, Scalar y, Scalar z, int BCswitch)
 {
   Scalar func = 0.0;
 
   int modes = int(numModes);
 
-  if (m3Flag == true) {
+  if (BCswitch == 1) {
 
     // If were nabbing m3, we want to ignore the case with kz = 0 and
     // kx = anything but zero
@@ -721,7 +787,7 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
   
     }
   
-  } else {
+  } else if (BCswitch == 2) {
     
     // ONLY if kz = 0 and kx is non-zero do we solve for m1 instead
     
@@ -768,6 +834,35 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
         break;
   
     }
+
+  } else {
+
+    
+    func += (std::sqrt(kx1*kx1 + kz1*kz1))
+              *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+
+    switch (modes) {
+    
+      case 1:
+
+        // done!
+
+        break;
+    
+      case 5:
+    
+        func += (std::sqrt(kx2*kx2 + kz2*kz2))
+                *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+        func += (std::sqrt(kx3*kx3 + kz3*kz3))
+                *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+        func += (std::sqrt(kx4*kx4 + kz1*kz4))
+                *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+        func += (std::sqrt(kx5*kx5 + kz5*kz5))
+                *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+
+        break;
+    
+      }
 
   }
 

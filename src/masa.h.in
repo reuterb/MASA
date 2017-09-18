@@ -465,6 +465,11 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_source_bottom    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
+  template <typename Scalar>
+  Scalar masa_eval_source_phiTop    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_source_phiBottom    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   // --------------------------------
   // manufactured analytical solution -- 4D

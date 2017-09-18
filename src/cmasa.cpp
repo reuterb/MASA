@@ -294,6 +294,9 @@ extern "C" double masa_eval_4d_source_m1  (double x,double y,double z,double t){
 extern "C" double masa_eval_4d_source_m3  (double x,double y,double z,double t){return(masa_eval_source_m3  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_top  (double x,double y,double z,double t){return(masa_eval_source_top  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_bottom  (double x,double y,double z,double t){return(masa_eval_source_bottom  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_phiTop  (double x,double y,double z,double t){return(masa_eval_source_phiTop  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_phiBottom  (double x,double y,double z,double t){return(masa_eval_source_phiBottom  <double>(x,y,z,t));}
+
 
 extern "C" double masa_eval_4d_exact_mD_1     (double x,double y,double z,double t){return(masa_eval_exact_mD_1 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mD_2     (double x,double y,double z,double t){return(masa_eval_exact_mD_2 <double>  (x,y,z,t));}

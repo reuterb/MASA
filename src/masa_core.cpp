@@ -1059,6 +1059,19 @@ Scalar MASA::masa_eval_source_bottom(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_q_bottom(x,y,z,t);
 }
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_phiTop(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_phiTop(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_phiBottom(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_phiBottom(x,y,z,t);
+}
+
   // --------------------------------
   // analytical terms
   // --------------------------------
@@ -1546,6 +1559,8 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_m3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_bottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_phiTop<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_phiBottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \

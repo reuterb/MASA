@@ -1108,6 +1108,48 @@ module masa
      end function masa_eval_4d_source_bottom
   end interface
 
+  interface
+     !> Evaluates the 'four' dimensional source term for top BC.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the source term.
+     !!
+     real (c_double) function masa_eval_4d_source_phiTop(x,y,z,t) bind (C,name='masa_eval_4d_source_phiTop')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+     end function masa_eval_4d_source_phiTop
+  end interface
+
+  interface
+     !> Evaluates the 'four' dimensional source term for bottom BC.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the source term.
+     !!
+     real (c_double) function masa_eval_4d_source_phiBottom(x,y,z,t) bind (C,name='masa_eval_4d_source_phiBottom')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+     end function masa_eval_4d_source_phiBottom
+  end interface
+
   ! ---------------------------------
   ! MMS analytical term interfaces -- 1d
   ! ---------------------------------
