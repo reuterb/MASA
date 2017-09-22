@@ -1113,7 +1113,7 @@ template <typename Scalar>
 Scalar helper_alpha(Scalar y)
 {
   Scalar func;
-  func = 2.0;// - std::pow(y,Scalar(4.0));
+  func = 2.0 - std::pow(y,Scalar(4.0));
 
   return func;
 }
@@ -1122,7 +1122,7 @@ template <typename Scalar>
 Scalar helper_beta(Scalar y)
 {
   Scalar func;
-  func = 2.0;// - std::pow(y,Scalar(2.0));
+  func = 2.0 - std::pow(y,Scalar(2.0));
 
   return func;
 }
@@ -1391,12 +1391,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_div_mC(Scalar x
 
   NumberVector<NDIM, ADScalar> mC;
 
-  // mC = grad(zetaPsi) 
-
   mC = gradient(helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
                                x,y,z))*helper_T(t1);
 
-  //return raw_value(mC[1].derivatives()[1]);
   return raw_value(divergence(mC));
 
 }
