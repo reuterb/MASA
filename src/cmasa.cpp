@@ -288,6 +288,10 @@ extern "C" double masa_eval_4d_grad_rho (double x,double y,double z,double t,int
 
 // MY STUFF
 //
+//
+//
+
+extern "C" double masa_eval_4d_source_z    (double x,double y,double z,double t){return(masa_eval_source_z    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_phi    (double x,double y,double z,double t){return(masa_eval_source_phi    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_omega  (double x,double y,double z,double t){return(masa_eval_source_omega  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_m1  (double x,double y,double z,double t){return(masa_eval_source_m1  <double>(x,y,z,t));}
@@ -308,6 +312,7 @@ extern "C" double masa_eval_4d_exact_div_mC     (double x,double y,double z,doub
 extern "C" double masa_eval_4d_exact_mu       (double x,double y,double z,double t){return(masa_eval_exact_mu   <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_omega    (double x,double y,double z,double t){return(masa_eval_exact_omega<double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_phi      (double x,double y,double z,double t){return(masa_eval_exact_phi  <double>  (x,y,z,t));}
+extern "C" double masa_eval_4d_exact_z      (double x,double y,double z,double t){return(masa_eval_exact_z  <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_RHSomega      (double x,double y,double z,double t){return(masa_eval_exact_RHSomega  <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_RHSphi      (double x,double y,double z,double t){return(masa_eval_exact_RHSphi  <double>  (x,y,z,t));}
 
