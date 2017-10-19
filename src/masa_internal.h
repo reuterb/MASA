@@ -181,8 +181,10 @@ namespace MASA
     // MY STUFF
 
     virtual Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar)    {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
-    virtual Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar)   {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
-    virtual Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar)   {std::cout << "MASA ERROR:: Analytical Solution (phi) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (omega) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_z(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (Z) is unavailable or not properly loaded.\n"; return -1.33;};
+
 
     virtual Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_1) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mD_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
@@ -273,6 +275,7 @@ namespace MASA
     // MY STUFF
     virtual Scalar eval_q_phi(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (phi) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (omega) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_z(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (Z) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m1) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m3) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_top(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (top) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
@@ -2433,6 +2436,7 @@ public:
   Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_phi  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_rho  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_z  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_top(Scalar,Scalar,Scalar,Scalar);
@@ -2446,6 +2450,7 @@ public:
   Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_rho(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_z(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar);

@@ -1037,6 +1037,12 @@ Scalar MASA::masa_eval_source_phi(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_source_z(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_z(x,y,z,t);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_source_m1(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_q_m1(x,y,z,t);
@@ -1258,6 +1264,11 @@ Scalar MASA::masa_eval_exact_phi(Scalar x,Scalar y,Scalar z,Scalar t)
   return masa_master<Scalar>().get_ms().eval_exact_phi(x,y,z,t);
 }
 
+template <typename Scalar>
+Scalar MASA::masa_eval_exact_z(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_z(x,y,z,t);
+}
 
 template <typename Scalar>
 Scalar MASA::masa_eval_exact_mD_1(Scalar x,Scalar y,Scalar z,Scalar t)
@@ -1555,6 +1566,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_grad_rho<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template Scalar masa_eval_source_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_z<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
@@ -1562,6 +1574,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_phiTop<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phiBottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_z<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mD_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \

@@ -33,7 +33,7 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z);
 
 template <typename Scalar, typename Scalar2>
-Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y);
+Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y, Scalar2 noSlip);
   
 template <typename Scalar, typename Scalar2>
 Scalar helper_phi(Scalar2 kx, Scalar2 kz, Scalar y, Scalar2 noSlip);
@@ -49,12 +49,21 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                       Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                       Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar2 noSlip,
                       Scalar x, Scalar y, Scalar z);
+
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaGammaPlus(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                            Scalar x, Scalar y, Scalar z);
+
 
 template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                           Scalar2 noSlip,
                            Scalar x, Scalar y, Scalar z, bool m3Flag);
 
 
@@ -62,6 +71,7 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                             Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                             Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                            Scalar2 noSlip,
                             Scalar x, Scalar y, Scalar z, int BCswitch);
 
 template <typename Scalar>
@@ -69,6 +79,9 @@ Scalar helper_alpha(Scalar y);
 
 template <typename Scalar>
 Scalar helper_beta(Scalar y);
+
+template <typename Scalar>
+Scalar helper_gamma(Scalar y);
 
 template <typename Scalar>
 Scalar helper_T(Scalar t);
@@ -172,7 +185,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
                    x,y,z);
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
   mD[1] = (  zetaPhi.derivatives()[2] 
@@ -275,7 +288,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
   mD[1] = (  zetaPhi.derivatives()[2] 
@@ -376,7 +389,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
@@ -407,6 +420,81 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
 }
 
 template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
+  typedef D2Type ADScalar;
+
+  typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
+  typedef D1TimeType ADTimeScalar;
+
+  // Treat velocity as a vector
+  NumberVector<NDIM, ADScalar> U,mC,mD;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,noSlip,
+                   x,y,z);
+ 
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
+
+  mC = gradient(zetaPsi)*helper_T(t1);
+
+  ADScalar rho  = helper_alpha(y);
+  ADScalar mu   = helper_beta(y);
+  ADScalar zVar = 
+    helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                         x,y,z);
+
+  U = (mD + mC) / rho;
+
+  // Time part
+
+  ADTimeScalar xt = 
+    ADTimeScalar(x1,NumberVectorUnitVector<NDIM+1, 0, Scalar>::value());
+  ADTimeScalar yt = 
+    ADTimeScalar(y1,NumberVectorUnitVector<NDIM+1, 1, Scalar>::value());
+  ADTimeScalar zt = 
+    ADTimeScalar(z1,NumberVectorUnitVector<NDIM+1, 2, Scalar>::value());
+  ADTimeScalar tt = 
+    ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
+
+  ADTimeScalar zTime = 
+    helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                         xt,yt,zt);
+
+  // Rho equation residuals
+  Scalar Q_z = 
+                // Temporal part
+                zTime.derivatives()[3]
+
+        +
+                // U dot grad(Z)
+                raw_value(U.dot(gradient(zVar)))
+        
+        -
+                // viscous
+       raw_value(   1.0/re*1.0/sc*(
+                    1.0/rho*gradient(mu).dot(gradient(zVar))
+                  +  mu/rho*divergence(gradient(zVar))));
+
+  return Q_z;
+
+}
+
+template <typename Scalar>
 Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
@@ -426,7 +514,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
@@ -465,7 +553,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
 
   ADTimeScalar zetaPsiTime = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   xt,yt,zt)*helper_T(tt);
+                   noSlip,xt,yt,zt)*helper_T(tt);
 
   ADTimeScalar m1_C = zetaPsiTime.derivatives()[0];
 
@@ -510,7 +598,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scala
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
@@ -549,7 +637,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scala
 
   ADTimeScalar zetaPsiTime = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   xt,yt,zt)*helper_T(tt);
+                   noSlip,xt,yt,zt)*helper_T(tt);
 
   ADTimeScalar m3_C = zetaPsiTime.derivatives()[2];
 
@@ -591,19 +679,19 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_top(Scalar x1, Scal
 
   ADScalar zetaPsi_m1 = 
     helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                        x,y,z,false);
+                        noSlip,x,y,z,false);
 
   ADScalar zetaPsi_m3 = 
     helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                        x,y,z,true);
+                        noSlip,x,y,z,true);
 
   ADScalar zetaPsiTimesK_m3 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,1);
+                         noSlip,x,y,z,1);
 
   ADScalar zetaPsiTimesK_m1 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,2);
+                         noSlip,x,y,z,2);
 
   mC_m1 = gradient(zetaPsi_m1)*helper_T(t1);
   mC_m3 = gradient(zetaPsi_m3)*helper_T(t1);
@@ -635,19 +723,19 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_bottom(Scalar x1, S
 
   ADScalar zetaPsi_m1 = 
     helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                        x,y,z,false);
+                        noSlip,x,y,z,false);
 
   ADScalar zetaPsi_m3 = 
     helper_zetaPsiCases(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                        x,y,z,true);
+                        noSlip,x,y,z,true);
 
   ADScalar zetaPsiTimesK_m3 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,1);
+                         noSlip,x,y,z,1);
 
   ADScalar zetaPsiTimesK_m1 = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,2);
+                         noSlip,x,y,z,2);
 
   mC_m1 = gradient(zetaPsi_m1)*helper_T(t1);
   mC_m3 = gradient(zetaPsi_m3)*helper_T(t1);
@@ -679,11 +767,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiTop(Scalar x1, S
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   ADScalar zetaPsiTimesK = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,3);
+                         noSlip,x,y,z,3);
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
@@ -712,11 +800,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiBottom(Scalar x1
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   ADScalar zetaPsiTimesK = 
     helper_zetaPsiTimesK(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z,3);
+                         noSlip,x,y,z,3);
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
@@ -736,6 +824,7 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                           Scalar2 noSlip,
                            Scalar x, Scalar y, Scalar z, int BCswitch)
 {
   Scalar func = 0.0;
@@ -750,7 +839,7 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
     if ( ! ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx1*kx1 + kz1*kz1))
-                  *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+                  *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip);
         }
 
     switch (modes) {
@@ -766,25 +855,25 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
          if ( ! ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx2*kx2 + kz2*kz2))
-                  *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+                  *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y,noSlip);
         }   
 
          if ( ! ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx3*kx3 + kz3*kz3))
-                  *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+                  *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y,noSlip);
         }   
 
         if ( ! ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx4*kx4 + kz1*kz4))
-                  *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+                  *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y,noSlip);
         }   
 
         if ( ! ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx5*kx5 + kz5*kz5))
-                  *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+                  *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y,noSlip);
         }   
 
         break;
@@ -798,7 +887,7 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
     if ( ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx1*kx1 + kz1*kz1))
-                  *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+                  *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip);
         }
 
     switch (modes) {
@@ -814,25 +903,25 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
          if ( ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx2*kx2 + kz2*kz2))
-                  *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+                  *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y,noSlip);
         }   
 
          if ( ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx3*kx3 + kz3*kz3))
-                  *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+                  *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y,noSlip);
         }   
 
         if ( ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx4*kx4 + kz1*kz4))
-                  *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+                  *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y,noSlip);
         }   
 
         if ( ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
   
           func += (std::sqrt(kx5*kx5 + kz5*kz5))
-                  *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+                  *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y,noSlip);
         }   
 
         break;
@@ -843,7 +932,7 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
     
     func += (std::sqrt(kx1*kx1 + kz1*kz1))
-              *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+              *helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip);
 
     switch (modes) {
     
@@ -856,13 +945,13 @@ Scalar helper_zetaPsiTimesK(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
       case 5:
     
         func += (std::sqrt(kx2*kx2 + kz2*kz2))
-                *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+                *helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y,noSlip);
         func += (std::sqrt(kx3*kx3 + kz3*kz3))
-                *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+                *helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y,noSlip);
         func += (std::sqrt(kx4*kx4 + kz1*kz4))
-                *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+                *helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y,noSlip);
         func += (std::sqrt(kx5*kx5 + kz5*kz5))
-                *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+                *helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y,noSlip);
 
         break;
     
@@ -878,6 +967,7 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                       Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                       Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar2 noSlip,
                       Scalar x, Scalar y, Scalar z, bool m3Flag)
 {
 
@@ -891,7 +981,7 @@ Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
     if ( ! ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+          func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip);
         }
 
     switch (modes) {
@@ -906,22 +996,22 @@ Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
          if ( ! ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+          func += helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y,noSlip);
         }   
 
          if ( ! ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+          func += helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y,noSlip);
         }   
 
         if ( ! ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+          func += helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y,noSlip);
         }   
 
         if ( ! ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+          func += helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y,noSlip);
         }   
 
         break;
@@ -934,7 +1024,7 @@ Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
     
     if ( ( (kz1 == 0.0) && (std::abs(kx1) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+          func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip);
         }
 
     switch (modes) {
@@ -949,22 +1039,22 @@ Scalar helper_zetaPsiCases(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
          if ( ( (kz2 == 0.0) && (std::abs(kx2) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y);
+          func += helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y,noSlip);
         }   
 
          if ( ( (kz3 == 0.0) && (std::abs(kx3) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y);
+          func += helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y,noSlip);
         }   
 
         if ( ( (kz4 == 0.0) && (std::abs(kx4) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y);
+          func += helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y,noSlip);
         }   
 
         if ( ( (kz5 == 0.0) && (std::abs(kx5) > 1.0e-13) ) ) {
   
-          func += helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+          func += helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y,noSlip);
         }   
 
         break;
@@ -982,6 +1072,7 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPsi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                       Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                       Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                      Scalar2 noSlip,
                       Scalar x, Scalar y, Scalar z)
 {
 
@@ -993,16 +1084,16 @@ Scalar helper_zetaPsi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
     case 1:
 
-      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y);
+      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip);
       break;
 
     case 5:
 
-      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y)
-           +  helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y)
-           +  helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y)
-           +  helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y)
-           +  helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y);
+      func += helper_zeta(kx1,kz1,x,z)*helper_psi(kx1,kz1,y,noSlip)
+           +  helper_zeta(kx2,kz2,x,z)*helper_psi(kx2,kz2,y,noSlip)
+           +  helper_zeta(kx3,kz3,x,z)*helper_psi(kx3,kz3,y,noSlip)
+           +  helper_zeta(kx4,kz4,x,z)*helper_psi(kx4,kz4,y,noSlip)
+           +  helper_zeta(kx5,kz5,x,z)*helper_psi(kx5,kz5,y,noSlip);
       break;
 
   }
@@ -1045,6 +1136,39 @@ Scalar helper_zetaPhi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
 }
 
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaGammaPlus(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes, 
+                            Scalar x, Scalar y, Scalar z)
+{
+
+  Scalar func = 0.5;
+
+  int modes = int(numModes);
+
+  switch (modes) {
+
+    case 1:
+
+      func += helper_zeta(kx1,kz1,x,z)*helper_gamma(y);
+      break;
+
+    case 5:
+
+      func += (helper_zeta(kx1,kz1,x,z)*helper_gamma(y)
+           +   helper_zeta(kx2,kz2,x,z)*helper_gamma(y)
+           +   helper_zeta(kx3,kz3,x,z)*helper_gamma(y)
+           +   helper_zeta(kx4,kz4,x,z)*helper_gamma(y)
+           +   helper_zeta(kx5,kz5,x,z)*helper_gamma(y))/5.0;
+      break;
+
+  }
+
+  return func;
+
+}
+
 // example of a private method, called from exact_t
 template <typename Scalar, typename Scalar2>
 Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
@@ -1056,30 +1180,48 @@ Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
 }
 
 template <typename Scalar, typename Scalar2>
-Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y)
+Scalar helper_psi(Scalar2 kx, Scalar2 kz, Scalar y, Scalar2 noSlip)
 {
   Scalar func;
 
   Scalar2 kMag = std::sqrt(kx*kx + kz*kz);
 
-  Scalar2 a_psi, c_psi, e_psi;
+  Scalar2 a_psi, b_psi, c_psi, d_psi, e_psi;
 
   if ( kMag == 0. ) {
     
     a_psi = -1.0;
-    c_psi = 3.0;
-    e_psi = 0.0;
+    b_psi =  0.0;
+    c_psi =  3.0;
+    d_psi =  0.0;
+    e_psi =  0.0;
 
   } else {
+
+    if ( noSlip == 0.) {
   
-    a_psi = - (kMag + 1.0)/2.0;
-    c_psi = 1.0 - a_psi;
-    e_psi = 1.0/2.0*(-2.0/kMag - 2.0/a_psi - c_psi);
+      a_psi = - (kMag + 1.0)/2.0;
+      b_psi = 0.0;
+      c_psi = 1.0 - a_psi;
+      d_psi = 0.0;
+      e_psi = 1.0/2.0*(-2.0/kMag - 2.0/a_psi - c_psi); 
+
+    } else {
+
+      a_psi =  4.0;
+      b_psi =  0.0;
+      c_psi = -4.0;
+      d_psi = 0.0;
+      e_psi = 1.0;
+
+    } 
 
   }
 
   func =   1.0/4.0*a_psi*std::pow(y,Scalar(4.0))
+         + 1.0/3.0*b_psi*std::pow(y,Scalar(3.0))
          + 1.0/2.0*c_psi*std::pow(y,Scalar(2.0))
+         + d_psi*y
          + e_psi;
 
   return func;
@@ -1140,6 +1282,16 @@ Scalar helper_beta(Scalar y)
 {
   Scalar func;
   func = 2.0 - std::pow(y,Scalar(2.0));
+
+  return func;
+}
+
+template <typename Scalar>
+Scalar helper_gamma(Scalar y)
+{
+  Scalar func;
+
+  func = std::sqrt(Scalar(2.0))/16.0*(std::pow(y,Scalar(3.0)) + 1.0);
 
   return func;
 }
@@ -1239,7 +1391,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_1(Scalar x1,
   Scalar exact_1;
 
   exact_1 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                           x,y,z).derivatives()[0];
+                           noSlip,x,y,z).derivatives()[0];
 
   return exact_1 * helper_T(t1);
 }
@@ -1261,7 +1413,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_2(Scalar x1,
   Scalar exact_2;
 
   exact_2 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                           x,y,z).derivatives()[1];
+                           noSlip,x,y,z).derivatives()[1];
 
   return exact_2 * helper_T(t1);
 }
@@ -1283,7 +1435,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_3(Scalar x1,
   Scalar exact_3;
 
   exact_3 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                           x,y,z).derivatives()[2];
+                           noSlip,x,y,z).derivatives()[2];
 
   return exact_3 * helper_T(t1);
 }
@@ -1308,6 +1460,27 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
   exact_rho = helper_alpha(y1);//helper_zeta(kx,kz,x1,z1) * helper_alpha(y1);// * helper_T(t1);
 
   return exact_rho;
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_z(Scalar x1,
+                                                                   Scalar y1, 
+                                                                   Scalar z1,
+                                                                   Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef D1Type ADScalar;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  Scalar exact_z;
+
+  exact_z = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x1,y1,z1);
+
+  return exact_z;
 }
 
 template <typename Scalar>
@@ -1411,7 +1584,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_div_mC(Scalar x
 
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
@@ -1440,7 +1613,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
                    noSlip,x,y,z);
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
   mD[1] = (  zetaPhi.derivatives()[2] 
@@ -1505,7 +1678,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
                    noSlip,x,y,z);
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
   mD[1] = (  zetaPhi.derivatives()[2] 
@@ -1577,7 +1750,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, S
                    noSlip,x,y,z);
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
   mD[1] = (  zetaPhi.derivatives()[2] 
@@ -1625,7 +1798,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
                    noSlip,x,y,z);
   ADScalar zetaPsi = 
     helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   x,y,z);
+                   noSlip,x,y,z);
 
   mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
   mD[1] = (  zetaPhi.derivatives()[2] 
