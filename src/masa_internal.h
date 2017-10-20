@@ -197,7 +197,7 @@ namespace MASA
     virtual Scalar eval_exact_div_mC(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (div mC) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_RHSomega(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (RHSomega) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_RHSphi(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (RHSphi) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
-
+    virtual Scalar eval_exact_RHSz(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (RHSz) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
   /*
    * -------------------------------------------------------------------------------------------
    *
@@ -2461,6 +2461,7 @@ public:
   Scalar eval_exact_div_mC(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_RHSomega(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_RHSphi(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_RHSz(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int);
   Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int);
 

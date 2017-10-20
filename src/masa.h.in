@@ -535,6 +535,10 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_exact_RHSphi     (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
+  template <typename Scalar>
+  Scalar masa_eval_exact_RHSz     (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+
   // --------------------------------
   // gradient of analytical solutions
   // --------------------------------

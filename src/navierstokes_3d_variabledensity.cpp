@@ -490,7 +490,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
                     1.0/rho*gradient(mu).dot(gradient(zVar))
                   +  mu/rho*divergence(gradient(zVar))));
 
-  return Q_z;
+  return -Q_z;
 
 }
 
@@ -1837,6 +1837,51 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
   }
 
   return Cval;
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSz(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef D2Type ADScalar;
+
+  // Treat velocity, momentum as a vector
+  NumberVector<NDIM, ADScalar> U,mD,mC;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zetaPhi = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+  ADScalar zetaPsi = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  mD[0] =    zetaPhi.derivatives()[1]   * helper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * helper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
+
+  mC = gradient(zetaPsi)*helper_T(t1);
+
+  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+
+  U = (mD + mC) / rho;
+ 
+  ADScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x,y,z);
+
+  Scalar RHS_z = raw_value(-U.dot(gradient(zVar))) 
+    + raw_value(1.0/(re*sc)*(1.0/rho*gradient(mu).dot(gradient(zVar)) 
+                   + mu/rho*divergence(gradient(zVar))));
+
+
+  return RHS_z;
 
 }
 // ----------------------------------------
