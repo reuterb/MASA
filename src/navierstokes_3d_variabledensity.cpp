@@ -363,6 +363,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
                 // Viscous part
               - 1./re*divergence(gradient(DivTau[1]))
               + 1./re*DivDivTau.derivatives()[1]
+                // gravity
+              + ( rho.derivatives()[0].derivatives()[0] + 
+                  rho.derivatives()[2].derivatives()[2] )
 
               );
 
@@ -475,7 +478,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
     helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
                          xt,yt,zt);
 
-  // Rho equation residuals
+  // Z equation residuals
   Scalar Q_z = 
                 // Temporal part
                 zTime.derivatives()[3]
@@ -490,7 +493,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
                     1.0/rho*gradient(mu).dot(gradient(zVar))
                   +  mu/rho*divergence(gradient(zVar))));
 
-  return -Q_z;
+  return Q_z;
 
 }
 
@@ -565,7 +568,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
 
   D2Type C12 = -rho*U[0]*U[1];
 
-  // Rho equation residuals
+  // m1 equation residuals
   Scalar Q_m1 = 
                 // Temporal part
                 m1_D.derivatives()[3] + m1_C.derivatives()[3]
@@ -649,7 +652,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scala
 
   D2Type C23 = -rho*U[1]*U[2];
 
-  // Rho equation residuals
+  // m3 equation residuals
   Scalar Q_m3 = 
                 // Temporal part
                 m3_D.derivatives()[3] + m3_C.derivatives()[3]
