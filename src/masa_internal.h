@@ -2429,6 +2429,7 @@ private:
   Scalar kz4;
   Scalar kz5;
   Scalar noSlip;
+  Scalar addMean;
 
 public:
   navierstokes_3d_variabledensity();
