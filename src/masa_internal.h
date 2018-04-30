@@ -327,6 +327,9 @@ namespace MASA
 
     virtual Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
 
+    virtual Scalar eval_g_jacF(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
+
+
 
 
   /*
@@ -2465,6 +2468,7 @@ public:
   Scalar eval_exact_RHSz(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int);
   Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_jacF(Scalar,Scalar,Scalar,Scalar,int);
 
 //  NumberVector<int,Scalar> Cij(Scalar,Scalar,Scalar,Scalar);
 //  NumberVector<int,Scalar> DivTauij(Scalar,Scalar,Scalar,Scalar);
