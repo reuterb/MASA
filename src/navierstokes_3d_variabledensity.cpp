@@ -1285,7 +1285,7 @@ template <typename Scalar>
 Scalar helper_alpha(Scalar y)
 {
   Scalar func;
-  func = 2.0 - std::pow(y,Scalar(4.0));
+  func = 2.0;// - std::pow(y,Scalar(4.0));
 
   return func;
 }
@@ -1313,7 +1313,7 @@ template <typename Scalar>
 Scalar helper_T(Scalar t)
 {
   Scalar func;
-  func = std::exp(t);
+  func = t*t; std::exp(t);
 
   return func;
 }
@@ -1470,9 +1470,42 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
 
   Scalar exact_rho;
 
-  exact_rho = helper_alpha(y1);//helper_zeta(kx,kz,x1,z1) * helper_alpha(y1);// * helper_T(t1);
+  exact_rho = helper_alpha(y1) * helper_T(t1);
 
   return exact_rho;
+}
+
+// public method
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_drho(Scalar x1,
+                                                                     Scalar y1, 
+                                                                     Scalar z1,
+                                                                     Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef D1Type ADScalar;
+
+  typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
+  typedef D1TimeType ADTimeScalar;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  ADTimeScalar xt = 
+    ADTimeScalar(x1,NumberVectorUnitVector<NDIM+1, 0, Scalar>::value());
+  ADTimeScalar yt = 
+    ADTimeScalar(y1,NumberVectorUnitVector<NDIM+1, 1, Scalar>::value());
+  ADTimeScalar zt = 
+    ADTimeScalar(z1,NumberVectorUnitVector<NDIM+1, 2, Scalar>::value());
+  ADTimeScalar tt = 
+    ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
+
+  ADTimeScalar exact_rho;
+
+  exact_rho = helper_alpha(yt) * helper_T(tt);
+
+  return exact_rho.derivatives()[3];
 }
 
 template <typename Scalar>
@@ -1491,7 +1524,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_z(Scalar x1,
   Scalar exact_z;
 
   exact_z = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x1,y1,z1);
+                                 x1,y1,z1) * helper_T(t1);
 
   return exact_z;
 }

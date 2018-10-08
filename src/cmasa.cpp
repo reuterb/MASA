@@ -310,6 +310,7 @@ extern "C" double masa_eval_4d_exact_mC_2     (double x,double y,double z,double
 extern "C" double masa_eval_4d_exact_mC_3     (double x,double y,double z,double t){return(masa_eval_exact_mC_3 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_div_mC     (double x,double y,double z,double t){return(masa_eval_exact_div_mC <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mu       (double x,double y,double z,double t){return(masa_eval_exact_mu   <double>  (x,y,z,t));}
+extern "C" double masa_eval_4d_exact_drho       (double x,double y,double z,double t){return(masa_eval_exact_drho   <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_omega    (double x,double y,double z,double t){return(masa_eval_exact_omega<double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_phi      (double x,double y,double z,double t){return(masa_eval_exact_phi  <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_z      (double x,double y,double z,double t){return(masa_eval_exact_z  <double>  (x,y,z,t));}

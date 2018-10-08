@@ -1253,6 +1253,12 @@ Scalar MASA::masa_eval_exact_mu(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_exact_drho(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_drho(x,y,z,t);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_exact_omega(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_exact_omega(x,y,z,t);
@@ -1585,6 +1591,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_phiTop<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phiBottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_drho<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_z<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \

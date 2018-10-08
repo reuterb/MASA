@@ -524,6 +524,9 @@ namespace MASA
   Scalar masa_eval_exact_mu        (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
+  Scalar masa_eval_exact_drho      (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
   Scalar masa_eval_exact_phi       (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>

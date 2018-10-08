@@ -181,6 +181,7 @@ namespace MASA
     // MY STUFF
 
     virtual Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar)    {std::cout << "MASA ERROR:: Analytical Solution (mu) is unavailable or not properly loaded.\n"; return -1.33;};
+    virtual Scalar eval_exact_drho(Scalar,Scalar,Scalar,Scalar)    {std::cout << "MASA ERROR:: Analytical Solution (drho) is unavailable or not properly loaded.\n"; return -1.33;};
     virtual Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar)   {std::cout << "MASA ERROR:: Analytical Solution (phi) is unavailable or not properly loaded.\n"; return -1.33;};
     virtual Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (omega) is unavailable or not properly loaded.\n"; return -1.33;};
     virtual Scalar eval_exact_z(Scalar,Scalar,Scalar,Scalar) {std::cout << "MASA ERROR:: Analytical Solution (Z) is unavailable or not properly loaded.\n"; return -1.33;};
@@ -2456,6 +2457,7 @@ public:
   Scalar eval_exact_rho(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_z(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_drho(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_3(Scalar,Scalar,Scalar,Scalar);

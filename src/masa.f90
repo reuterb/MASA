@@ -1669,6 +1669,28 @@ module masa
 
   interface
      !> Evaluates the 'four' dimensional exact solution of the
+     !! time derivative of density.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the exact solution.
+     !!
+     real (c_double) function masa_eval_4d_exact_drho(x,y,z,t) bind (C,name='masa_eval_4d_exact_drho')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+    end function masa_eval_4d_exact_drho
+  end interface
+
+  interface
+     !> Evaluates the 'four' dimensional exact solution of the
      !! vertical component of the Laplacian of the divergence-free momentum.
      !!
      !! @param[in] x Real(8) value of the x-coordinate.
