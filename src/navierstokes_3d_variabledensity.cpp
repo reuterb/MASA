@@ -461,7 +461,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
   ADScalar mu   = helper_beta(y);
   ADScalar zVar = 
     helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z);
+                         x,y,z) * helper_T(t1);
 
   U = (mD + mC) / rho;
 
@@ -478,7 +478,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
 
   ADTimeScalar zTime = 
     helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         xt,yt,zt);
+                         xt,yt,zt)*helper_T(tt);
 
   // Z equation residuals
   Scalar Q_z = 
@@ -1313,7 +1313,7 @@ template <typename Scalar>
 Scalar helper_T(Scalar t)
 {
   Scalar func;
-  func = t*t; std::exp(t);
+  func = (1. + 10.*t + 20.*t*t + 30.*t*t*t);//std::exp(t);
 
   return func;
 }
@@ -1470,7 +1470,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
 
   Scalar exact_rho;
 
-  exact_rho = helper_alpha(y1) * helper_T(t1);
+  exact_rho = helper_alpha(y1);// helper_T(t1);
 
   return exact_rho;
 }
