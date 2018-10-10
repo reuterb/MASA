@@ -39,6 +39,12 @@ template <typename Scalar, typename Scalar2>
 Scalar helper_phi(Scalar2 kx, Scalar2 kz, Scalar y, Scalar2 noSlip, Scalar2 addMean);
 
 template <typename Scalar, typename Scalar2>
+Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                            Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                            Scalar2 kx5, Scalar2 kz5, Scalar2 numModes,
+                            Scalar x, Scalar y, Scalar z);
+
+template <typename Scalar, typename Scalar2>
 Scalar helper_zetaPhi(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
                       Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
                       Scalar2 kx5, Scalar2 kz5, Scalar2 numModes, 
@@ -196,9 +202,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
+  D3Type x3 = D3Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D3Type y3 = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  D3Type z3 = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D3Type rho = helper_alpha(y3); 
+  D3Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x3,y3,z3)* helper_T(t1); 
   D3Type mu  = helper_beta(y3); 
 
   U = (mD + mC) / rho;
@@ -299,8 +308,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
+  D4Type x4 = D4Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D4Type y4 = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D4Type rho = helper_alpha(y4);
+  D4Type z4 = D4Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  D4Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x4,y4,z4)* helper_T(t1);
   D4Type mu  = helper_beta(y4);
 
   U = (mD + mC) / rho;
@@ -366,8 +378,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
               - 1./re*divergence(gradient(DivTau[1]))
               + 1./re*DivDivTau.derivatives()[1]
                 // gravity
-              //+ ( rho.derivatives()[0].derivatives()[0] + 
-              //    rho.derivatives()[2].derivatives()[2] )
+              + ( rho.derivatives()[0].derivatives()[0] + 
+                  rho.derivatives()[2].derivatives()[2] )
 
               );
 
@@ -409,7 +421,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar rho = helper_alpha(yt);
+  ADTimeScalar rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 xt,yt,zt) * helper_T(tt);
 
   // Rho equation residuals
   Scalar Q_rho = 
@@ -457,7 +470,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho  = helper_alpha(y);
+  ADScalar rho  = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x,y,z) * helper_T(t1);
   ADScalar mu   = helper_beta(y);
   ADScalar zVar = 
     helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
@@ -533,9 +547,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
            - zetaPhi.derivatives()[0] ) * helper_T(t1);
   mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
+  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type rho = helper_alpha(y2); 
+  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x2,y2,z2) * helper_T(t1); 
   D2Type mu  = helper_beta(y2); 
 
   U = (mD + mC) / rho;
@@ -618,9 +635,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scala
            - zetaPhi.derivatives()[0] ) * helper_T(t1);
   mD[2] =  - zetaPhi.derivatives()[1]   * helper_T(t1);
 
+  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type rho = helper_alpha(y2); 
+  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x2,y2,z2) * helper_T(t1); 
   D2Type mu  = helper_beta(y2); 
 
   U = (mD + mC) / rho;
@@ -1176,6 +1196,39 @@ Scalar helper_zetaGammaPlus(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
 }
 
+template <typename Scalar, typename Scalar2>
+Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
+                        Scalar2 kx3, Scalar2 kz3, Scalar2 kx4, Scalar2 kz4,
+                        Scalar2 kx5, Scalar2 kz5, Scalar2 numModes, 
+                        Scalar x, Scalar y, Scalar z)
+{
+
+  Scalar func = 0.0;
+
+  int modes = int(numModes);
+
+  switch (modes) {
+
+    case 1:
+
+      func += helper_zeta(kx1,kz1,x,z)*helper_alpha(y);
+      break;
+
+    case 5:
+
+      func += (helper_zeta(kx1,kz1,x,z)*helper_alpha(y)
+           +   helper_zeta(kx2,kz2,x,z)*helper_alpha(y)
+           +   helper_zeta(kx3,kz3,x,z)*helper_alpha(y)
+           +   helper_zeta(kx4,kz4,x,z)*helper_alpha(y)
+           +   helper_zeta(kx5,kz5,x,z)*helper_alpha(y));
+      break;
+
+  }
+
+  return func;
+
+}
+
 // example of a private method, called from exact_t
 template <typename Scalar, typename Scalar2>
 Scalar helper_zeta(Scalar2 kx, Scalar2 kz, Scalar x, Scalar z)
@@ -1285,7 +1338,7 @@ template <typename Scalar>
 Scalar helper_alpha(Scalar y)
 {
   Scalar func;
-  func = 2.0;// - std::pow(y,Scalar(4.0));
+  func = 2.0 - std::pow(y,Scalar(4.0));
 
   return func;
 }
@@ -1470,7 +1523,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
 
   Scalar exact_rho;
 
-  exact_rho = helper_alpha(y1);// helper_T(t1);
+  exact_rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x1,y1,z1) * helper_T(t1);
 
   return exact_rho;
 }
@@ -1479,9 +1533,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
 
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_drho(Scalar x1,
-                                                                     Scalar y1, 
-                                                                     Scalar z1,
-                                                                     Scalar t1)
+                                                                      Scalar y1, 
+                                                                      Scalar z1,
+                                                                      Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1503,7 +1557,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_drho(Scalar x1,
 
   ADTimeScalar exact_rho;
 
-  exact_rho = helper_alpha(yt) * helper_T(tt);
+  exact_rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 xt,yt,zt) * helper_T(tt);
 
   return exact_rho.derivatives()[3];
 }
@@ -1668,8 +1723,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
+  D3Type x3  = D3Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D3Type y3  = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D3Type rho = helper_alpha(y3); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  D3Type z3  = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  D3Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x3,y3,z3)* helper_T(t1); 
   D3Type mu  = helper_beta(y3); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
@@ -1733,9 +1792,13 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  D4Type y4 = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  D4Type x4  = D4Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  D4Type y4  = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  D4Type z4  = D4Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D4Type rho = helper_alpha(y4); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  D4Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x4,y4,z4)* helper_T(t1); 
+
   D4Type mu  = helper_beta(y4); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
@@ -1805,8 +1868,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, S
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
+  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D2Type rho = helper_alpha(y2); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                 x2,y2,z2) * helper_T(t1); 
   D2Type mu  = helper_beta(y2); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
@@ -1853,8 +1919,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
-
+  ADScalar rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                  x,y,z) * helper_T(t1); 
+ 
   U = (mD + mC) / rho;
 
   // get Cij
@@ -1914,7 +1981,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSz(Scalar x1,
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_alpha(y); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  ADScalar rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                  x,y,z) * helper_T(t1); 
+ 
   ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
@@ -1947,8 +2016,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_jacF(Scalar x1, Sca
   ADScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
                                        x,y,z);
 
+  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D2Type rho = helper_alpha(y2); //helper_zeta(kx,kz,x,z) * helper_alpha(y);// * helper_T(t1); 
+  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                  x2,y2,z2) * helper_T(t1); 
 
   return raw_value(-1./rho*gradient(zVar)[i]);
 }
