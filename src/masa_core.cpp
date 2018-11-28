@@ -1301,6 +1301,12 @@ Scalar MASA::masa_eval_exact_mC_1(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_exact_mean_mC_2(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_exact_mean_mC_2(x,y,z,t);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_exact_mC_2(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_exact_mC_2(x,y,z,t);
@@ -1600,6 +1606,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_exact_mD_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_exact_mean_mC_2<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mC_3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_div_mC<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_RHSomega<Scalar>(Scalar,Scalar,Scalar,Scalar); \

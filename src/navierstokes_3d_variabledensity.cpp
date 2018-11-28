@@ -121,6 +121,8 @@ MASA::navierstokes_3d_variabledensity<Scalar>::navierstokes_3d_variabledensity()
   this->register_var("kz4",&kz4);
   this->register_var("kx5",&kx5);
   this->register_var("kz5",&kz5);
+  this->register_var("zero",&zero);
+  this->register_var("one",&one);
  
   this->register_var("numModes",&numModes);
 
@@ -156,6 +158,8 @@ int MASA::navierstokes_3d_variabledensity<Scalar>::init_var()
   err += this->set_var("numModes",1); 
   err += this->set_var("noSlip",0);
   err += this->set_var("addMean",0);
+  err += this->set_var("zero",0.);
+  err += this->set_var("one",1);
 
   return err;
 
@@ -1205,13 +1209,16 @@ Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
   Scalar func = 6.; 
 
+  //return func * helper_alpha(y);
+
   int modes = int(numModes);
 
   switch (modes) {
 
     case 1:
 
-      func += helper_zeta(kx1,kz1,x,z)*helper_alpha(y);
+      func += .6*helper_zeta(kx1,kz1,x,z)*helper_alpha(y);
+      //func += .1*helper_zeta(kx1,kz1,x,z)*helper_alpha(y);
       break;
 
     case 5:
@@ -1338,7 +1345,7 @@ template <typename Scalar>
 Scalar helper_alpha(Scalar y)
 {
   Scalar func;
-  func = 2.0;// - std::pow(y,Scalar(4.0));
+  func = 2.0 - std::pow(y,Scalar(4.0));
 
   return func;
 }
@@ -1366,7 +1373,11 @@ template <typename Scalar>
 Scalar helper_T(Scalar t)
 {
   Scalar func;
-  func = 1.;//(1. + 10.*t + 20.*t*t + 30.*t*t*t);//std::exp(t);
+
+  //func = 1.;
+  //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
+  func = std::exp(t/1e-3);
+  //func = std::exp(t);
 
   return func;
 }
@@ -1479,6 +1490,28 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_2(Scalar x1,
   Scalar exact_2;
 
   exact_2 = helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                           noSlip,x,y,z).derivatives()[1];
+
+  return exact_2 * helper_T(t1);
+}
+
+// public method
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mean_mC_2(Scalar x1, 
+                                                                           Scalar y1, 
+                                                                           Scalar z1,
+                                                                           Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef D1Type ADScalar;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  Scalar exact_2;
+
+  exact_2 = helper_zetaPsi(zero,zero,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,one,
                            noSlip,x,y,z).derivatives()[1];
 
   return exact_2 * helper_T(t1);
@@ -1831,6 +1864,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
                 // Viscous part
                 1./re*divergence(gradient(DivTau[1]))
               - 1./re*DivDivTau.derivatives()[1]
+
+                // gravity
+              - ( rho.derivatives()[0].derivatives()[0] + 
+                  rho.derivatives()[2].derivatives()[2] )
 
              );
 

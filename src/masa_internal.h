@@ -193,6 +193,7 @@ namespace MASA
  
     virtual Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_1) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
+    virtual Scalar eval_exact_mean_mC_2(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_2) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
     virtual Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (mC_3) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
 
     virtual Scalar eval_exact_div_mC(Scalar,Scalar,Scalar,Scalar)  {std::cout << "MASA ERROR:: Analytical Solution (div mC) is unavailable or not properly loaded.\n"; return -1.33;}; // overloaded for 4d problems
@@ -2434,6 +2435,8 @@ private:
   Scalar kz5;
   Scalar noSlip;
   Scalar addMean;
+  Scalar zero;
+  Scalar one;
 
 public:
   navierstokes_3d_variabledensity();
@@ -2463,6 +2466,7 @@ public:
   Scalar eval_exact_mD_3(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mean_mC_2(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_div_mC(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_RHSomega(Scalar,Scalar,Scalar,Scalar);

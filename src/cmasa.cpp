@@ -307,6 +307,7 @@ extern "C" double masa_eval_4d_exact_mD_2     (double x,double y,double z,double
 extern "C" double masa_eval_4d_exact_mD_3     (double x,double y,double z,double t){return(masa_eval_exact_mD_3 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mC_1     (double x,double y,double z,double t){return(masa_eval_exact_mC_1 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mC_2     (double x,double y,double z,double t){return(masa_eval_exact_mC_2 <double>  (x,y,z,t));}
+extern "C" double masa_eval_4d_exact_mean_mC_2     (double x,double y,double z,double t){return(masa_eval_exact_mean_mC_2 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mC_3     (double x,double y,double z,double t){return(masa_eval_exact_mC_3 <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_div_mC     (double x,double y,double z,double t){return(masa_eval_exact_div_mC <double>  (x,y,z,t));}
 extern "C" double masa_eval_4d_exact_mu       (double x,double y,double z,double t){return(masa_eval_exact_mu   <double>  (x,y,z,t));}
