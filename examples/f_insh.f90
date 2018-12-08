@@ -65,7 +65,8 @@ program main
   dz = real(lz)/real(nz);
 
   ! initialize the problem
-  call masa_init("incompressible homogeneous isotropic NS example","navierstokes_3d_variabledensity")
+  !call masa_init("incompressible homogeneous isotropic NS example","navierstokes_3d_variabledensity")
+  call masa_init("incompressible homogeneous isotropic NS example","navierstokes_3d_map")
 
   ! evaluate source terms (3D)
   do i=0, nx

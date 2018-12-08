@@ -92,8 +92,8 @@ Scalar helper_gamma(Scalar y);
 template <typename Scalar>
 Scalar helper_T(Scalar t);
 
-template <typename Scalar>
-Scalar rhoMap(Scalar Z, Scalar At);
+template <typename Scalar, typename Scalar2>
+Scalar rhoMap(Scalar Z, Scalar2 at);
 
 //template <typename Scalar>
 //NumberVector DivTauij(Scalar x1, Scalar y1, Scalar z1, Scalar t)
@@ -107,10 +107,9 @@ typedef D2Type ADType;
 using namespace MASA;
 
 template <typename Scalar>
-MASA::navierstokes_3d_variabledensity<Scalar>::navierstokes_3d_variabledensity()
+MASA::navierstokes_3d_map<Scalar>::navierstokes_3d_map()
 {
-  this->mmsname = "navierstokes_3d_variabledensity";
-  //this->mmsname = "MYFUNNAME";//navierstokes_3d_variabledensity";
+  this->mmsname = "navierstokes_3d_map";
   this->dimension = 4;
 
   this->register_var("re",&re);
@@ -139,7 +138,7 @@ MASA::navierstokes_3d_variabledensity<Scalar>::navierstokes_3d_variabledensity()
 } // done with constructor
 
 template <typename Scalar>
-int MASA::navierstokes_3d_variabledensity<Scalar>::init_var()
+int MASA::navierstokes_3d_map<Scalar>::init_var()
 {
   int err = 0;
 
@@ -177,7 +176,7 @@ int MASA::navierstokes_3d_variabledensity<Scalar>::init_var()
 
 // public static method, that can be called from eval_q_t
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_omega(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -216,9 +215,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
   D3Type y3 = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D3Type z3 = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D3Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x3,y3,z3) * helper_T(t1); 
-  D3Type mu  = helper_beta(y3); 
+  D3Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x3,y3,z3) * helper_T(t1);
+
+  D3Type rho = rhoMap(zVar,at);
+
+  D3Type mu  = rho; //helper_beta(y3); 
 
   U = (mD + mC) / rho;
 
@@ -271,8 +273,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
               - DivC[0].derivatives()[2] 
               + DivC[2].derivatives()[0]
                 // Viscous part
-              - 1./re*DivTau[0].derivatives()[2]
-              + 1./re*DivTau[2].derivatives()[0]
+              - 0.*1./re*DivTau[0].derivatives()[2]
+              + 0.*1./re*DivTau[2].derivatives()[0]
               
               );
 
@@ -280,7 +282,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_omega(Scalar x1, Sc
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_phi(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -321,9 +323,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
   D4Type x4 = D4Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D4Type y4 = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D4Type z4 = D4Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
-  D4Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x4,y4,z4) * helper_T(t1);
-  D4Type mu  = helper_beta(y4);
+  D4Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x4,y4,z4) * helper_T(t1);
+
+  D4Type rho = rhoMap(zVar,at);
+
+  D4Type mu  = rho; //helper_beta(y4);
 
   U = (mD + mC) / rho;
 
@@ -385,8 +390,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
               - divergence(gradient(DivC[1]))
               + DivDivC.derivatives()[1]
                 // Viscous part
-              - 1./re*divergence(gradient(DivTau[1]))
-              + 1./re*DivDivTau.derivatives()[1]
+              - 0.*1./re*divergence(gradient(DivTau[1]))
+              + 0.*1./re*DivDivTau.derivatives()[1]
                 // gravity
               + ( rho.derivatives()[0].derivatives()[0] + 
                   rho.derivatives()[2].derivatives()[2] )
@@ -397,7 +402,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phi(Scalar x1, Scal
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_rho(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -431,8 +436,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 xt,yt,zt) * helper_T(tt);
+  ADTimeScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       xt,yt,zt) * helper_T(tt);
+
+  ADTimeScalar rho = rhoMap(zVar,at);
 
   // Rho equation residuals
   Scalar Q_rho = 
@@ -448,7 +455,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_rho(Scalar x1, Scal
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -480,12 +487,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho  = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                   x,y,z) * helper_T(t1);
-  ADScalar mu   = helper_beta(y);
-  ADScalar zVar = 
-    helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z) * helper_T(t1);
+  ADScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x,y,z) * helper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at);
+  ADScalar mu  = rho; //helper_beta(y);
 
   U = (mD + mC) / rho;
 
@@ -515,7 +521,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
         
         -
                 // viscous
-       raw_value(   1.0/re*1.0/sc*(
+       raw_value(   0.*1.0/re*1.0/sc*(
                     1.0/rho*gradient(mu).dot(gradient(zVar))
                   +  mu/rho*divergence(gradient(zVar))));
 
@@ -524,7 +530,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -561,9 +567,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x2,y2,z2) * helper_T(t1); 
-  D2Type mu  = helper_beta(y2); 
+  D2Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x2,y2,z2) * helper_T(t1);
+
+  D2Type rho = rhoMap(zVar,at);
+
+  D2Type mu  = rho; //helper_beta(y2); 
 
   U = (mD + mC) / rho;
 
@@ -606,13 +615,13 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
         -
                 // RHS
                 raw_value(C12.derivatives()[1]
-                + 1./re*Tau[0][1].derivatives()[1]);
+                + 0.*1./re*Tau[0][1].derivatives()[1]);
 
   return Q_m1;
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -649,9 +658,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scala
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x2,y2,z2) * helper_T(t1); 
-  D2Type mu  = helper_beta(y2); 
+  D2Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x2,y2,z2) * helper_T(t1);
+
+  D2Type rho = rhoMap(zVar,at);
+
+  D2Type mu  = rho; //helper_beta(y2); 
 
   U = (mD + mC) / rho;
 
@@ -694,13 +706,13 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m3(Scalar x1, Scala
         -
                 // RHS
                 raw_value(C23.derivatives()[1] 
-                + 1./re*Tau[1][2].derivatives()[1]);
+                + 0.*1./re*Tau[1][2].derivatives()[1]);
 
   return Q_m3;
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_top(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_top(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -744,7 +756,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_top(Scalar x1, Scal
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_bottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_bottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -788,7 +800,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_bottom(Scalar x1, S
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiTop(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_phiTop(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -821,7 +833,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiTop(Scalar x1, S
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_phiBottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_q_phiBottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -1388,8 +1400,8 @@ Scalar helper_T(Scalar t)
   return func;
 }
 
-template <typename Scalar>
-Scalar rhoMap(Scalar Z, Scalar at)
+template <typename Scalar, typename Scalar2>
+Scalar rhoMap(Scalar Z, Scalar2 at)
 {
   Scalar rho;
 
@@ -1404,7 +1416,7 @@ Scalar rhoMap(Scalar Z, Scalar at)
 //
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_1(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mD_1(Scalar x1, 
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1425,7 +1437,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_1(Scalar x1,
 
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_2(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mD_2(Scalar x1, 
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1448,7 +1460,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_2(Scalar x1,
 
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_3(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mD_3(Scalar x1, 
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1470,7 +1482,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mD_3(Scalar x1,
 
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_1(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mC_1(Scalar x1, 
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1492,7 +1504,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_1(Scalar x1,
 
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_2(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mC_2(Scalar x1, 
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1514,7 +1526,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_2(Scalar x1,
 
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mean_mC_2(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mean_mC_2(Scalar x1, 
                                                                            Scalar y1, 
                                                                            Scalar z1,
                                                                            Scalar t1)
@@ -1536,7 +1548,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mean_mC_2(Scala
 
 // public method
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_3(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mC_3(Scalar x1, 
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1559,7 +1571,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mC_3(Scalar x1,
 // public method
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_rho(Scalar x1,
                                                                      Scalar y1, 
                                                                      Scalar z1,
                                                                      Scalar t1)
@@ -1571,18 +1583,18 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_rho(Scalar x1,
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  Scalar exact_rho;
+  Scalar zVar = raw_value(helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x,y,z) * helper_T(t1));
 
-  exact_rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x1,y1,z1) * helper_T(t1);
-
+  Scalar exact_rho = rhoMap(zVar,at);
+  
   return exact_rho;
 }
 
 // public method
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_drho(Scalar x1,
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_drho(Scalar x1,
                                                                       Scalar y1, 
                                                                       Scalar z1,
                                                                       Scalar t1)
@@ -1614,7 +1626,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_drho(Scalar x1,
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_z(Scalar x1,
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_z(Scalar x1,
                                                                    Scalar y1, 
                                                                    Scalar z1,
                                                                    Scalar t1)
@@ -1635,7 +1647,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_z(Scalar x1,
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mu(Scalar x1,
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_mu(Scalar x1,
                                                                     Scalar y1, 
                                                                     Scalar z1,
                                                                     Scalar t1)
@@ -1649,13 +1661,20 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_mu(Scalar x1,
 
   Scalar exact_mu;
 
-  exact_mu = helper_beta(y1); //helper_zeta(kx,kz,x1,z1) * helper_beta(y1);// * helper_T(t1);
+  Scalar zVar = raw_value(helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x,y,z) * helper_T(t1));
+
+  Scalar exact_rho = rhoMap(zVar,at);
+
+  exact_mu = exact_rho;
+
+  //exact_mu = helper_beta(y1); //helper_zeta(kx,kz,x1,z1) * helper_beta(y1);// * helper_T(t1);
 
   return exact_mu;
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_omega(Scalar x1, 
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_omega(Scalar x1, 
                                                                        Scalar y1, 
                                                                        Scalar z1, 
                                                                        Scalar t1)
@@ -1686,7 +1705,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_omega(Scalar x1
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_phi(Scalar x1,
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_phi(Scalar x1,
                                                                      Scalar y1, 
                                                                      Scalar z1, 
                                                                      Scalar t1)
@@ -1717,7 +1736,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_phi(Scalar x1,
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_div_mC(Scalar x1,
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_div_mC(Scalar x1,
                                                                         Scalar y1, 
                                                                         Scalar z1, 
                                                                         Scalar t1)
@@ -1744,7 +1763,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_div_mC(Scalar x
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_RHSomega(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -1777,9 +1796,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
   D3Type y3  = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D3Type z3  = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D3Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x3,y3,z3) * helper_T(t1); 
-  D3Type mu  = helper_beta(y3); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+  D3Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x3,y3,z3) * helper_T(t1);
+
+  D3Type rho = rhoMap(zVar,at);
+
+  D3Type mu  = rho; //helper_beta(y3); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -1802,8 +1824,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
                 DivC[0].derivatives()[2]
               - DivC[2].derivatives()[0]
                // Viscous part
-              + 1./re*DivTau[0].derivatives()[2]
-              - 1./re*DivTau[2].derivatives()[0]
+              + 0.*1./re*DivTau[0].derivatives()[2]
+              - 0.*1./re*DivTau[2].derivatives()[0]
 
              );
 
@@ -1812,7 +1834,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSomega(Scalar
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_RHSphi(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -1846,10 +1868,12 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
   D4Type y4  = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D4Type z4  = D4Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D4Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x4,y4,z4) * helper_T(t1); 
+  D4Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x4,y4,z4) * helper_T(t1);
 
-  D4Type mu  = helper_beta(y4); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+  D4Type rho = rhoMap(zVar,at);
+
+  D4Type mu  = rho; // helper_beta(y4); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -1879,8 +1903,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
               - DivDivC.derivatives()[1]
               +
                 // Viscous part
-                1./re*divergence(gradient(DivTau[1]))
-              - 1./re*DivDivTau.derivatives()[1]
+                0.*1./re*divergence(gradient(DivTau[1]))
+              - 0.*1./re*DivDivTau.derivatives()[1]
 
                 // gravity
               - ( rho.derivatives()[0].derivatives()[0] + 
@@ -1893,7 +1917,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSphi(Scalar x
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_g_DivTau(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -1925,9 +1949,13 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, S
   D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
-  D2Type rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x2,y2,z2) * helper_T(t1); 
-  D2Type mu  = helper_beta(y2); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+
+  D2Type zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x2,y2,z2) * helper_T(t1);
+
+  D2Type rho = rhoMap(zVar,at);
+
+  D2Type mu  = rho; //helper_beta(y2); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
   U = (mD + mC) / rho;
 
@@ -1944,7 +1972,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_DivTau(Scalar x1, S
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_g_C(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -1973,8 +2001,10 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                  x,y,z) * helper_T(t1); 
+  ADScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                                       x,y,z) * helper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at);
  
   U = (mD + mC) / rho;
 
@@ -2008,7 +2038,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_C(Scalar x1, Scalar
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSz(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_RHSz(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -2035,16 +2065,15 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSz(Scalar x1,
 
   mC = gradient(zetaPsi)*helper_T(t1);
 
-  ADScalar rho = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                  x,y,z) * helper_T(t1); 
- 
-  ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
-
-  U = (mD + mC) / rho;
- 
   ADScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
                                        x,y,z) * helper_T(t1);
 
+  ADScalar rho = rhoMap(zVar,at);
+
+  ADScalar mu  = rho; //helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
+
+  U = (mD + mC) / rho;
+ 
   Scalar RHS_z = raw_value(-U.dot(gradient(zVar)))
                + raw_value(1.0/(re*sc)*(1.0/rho*gradient(mu).dot(gradient(zVar))
                    + mu/rho*divergence(gradient(zVar))));
@@ -2054,7 +2083,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSz(Scalar x1,
 }
 
 template <typename Scalar>
-Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_jacF(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
+Scalar MASA::navierstokes_3d_map<Scalar>::eval_g_jacF(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
@@ -2083,7 +2112,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_jacF(Scalar x1, Sca
 // Template Instantiation(s)
 // ----------------------------------------
 
-MASA_INSTANTIATE_ALL(MASA::navierstokes_3d_variabledensity);
+MASA_INSTANTIATE_ALL(MASA::navierstokes_3d_map);
 
 
 #endif // HAVE_METAPHYSICL
