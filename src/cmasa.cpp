@@ -296,6 +296,10 @@ extern "C" double masa_eval_4d_source_phi    (double x,double y,double z,double 
 extern "C" double masa_eval_4d_source_omega  (double x,double y,double z,double t){return(masa_eval_source_omega  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_m1  (double x,double y,double z,double t){return(masa_eval_source_m1  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_m3  (double x,double y,double z,double t){return(masa_eval_source_m3  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_m1Top  (double x,double y,double z,double t){return(masa_eval_source_m1Top  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_m3Top  (double x,double y,double z,double t){return(masa_eval_source_m3Top  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_m1Bottom  (double x,double y,double z,double t){return(masa_eval_source_m1Bottom  <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_m3Bottom  (double x,double y,double z,double t){return(masa_eval_source_m3Bottom  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_top  (double x,double y,double z,double t){return(masa_eval_source_top  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_bottom  (double x,double y,double z,double t){return(masa_eval_source_bottom  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_phiTop  (double x,double y,double z,double t){return(masa_eval_source_phiTop  <double>(x,y,z,t));}

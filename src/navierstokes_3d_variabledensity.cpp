@@ -110,7 +110,6 @@ template <typename Scalar>
 MASA::navierstokes_3d_variabledensity<Scalar>::navierstokes_3d_variabledensity()
 {
   this->mmsname = "navierstokes_3d_variabledensity";
-  //this->mmsname = "MYFUNNAME";//navierstokes_3d_variabledensity";
   this->dimension = 4;
 
   this->register_var("re",&re);
@@ -165,7 +164,7 @@ int MASA::navierstokes_3d_variabledensity<Scalar>::init_var()
   err += this->set_var("noSlip",0);
   err += this->set_var("addMean",0);
   err += this->set_var("zero",0.);
-  err += this->set_var("one",1);
+  err += this->set_var("one",1.);
 
   return err;
 

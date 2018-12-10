@@ -1392,12 +1392,15 @@ Scalar helper_T(Scalar t)
 {
   Scalar func;
 
+  std::cout << "SHHHHHHHHHHHHHH" << std::endl;
+
   //func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
   //func = std::exp(t/1e-3);
   func = std::exp(t);
 
   return func;
+
 }
 
 template <typename Scalar, typename Scalar2>
@@ -1587,7 +1590,7 @@ Scalar MASA::navierstokes_3d_map<Scalar>::eval_exact_rho(Scalar x1,
                                        x,y,z) * helper_T(t1));
 
   Scalar exact_rho = rhoMap(zVar,at);
-  
+
   return exact_rho;
 }
 

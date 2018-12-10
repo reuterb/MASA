@@ -1057,6 +1057,30 @@ Scalar MASA::masa_eval_source_m3(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_source_m1Top(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_m1Top(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_m1Bottom(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_m1Bottom(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_m3Top(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_m3Top(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_m3Bottom(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_m3Bottom(x,y,z,t);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_source_top(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_q_top(x,y,z,t);
@@ -1595,7 +1619,11 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_m1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_m1Top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_m3Top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_bottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_m1Bottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_m3Bottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phiTop<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phiBottom<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_mu<Scalar>(Scalar,Scalar,Scalar,Scalar); \

@@ -280,6 +280,10 @@ namespace MASA
     virtual Scalar eval_q_z(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (Z) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m1) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m3) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_m1Top(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m1) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_m3Top(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m3) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_m1Bottom(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m1) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_m3Bottom(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m3) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_top(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (top) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_bottom(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (bottom) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_phiTop(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (top) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
@@ -2590,6 +2594,10 @@ public:
   Scalar eval_q_z  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m1Top(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m3Top(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m1Bottom(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m3Bottom(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_top(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_bottom(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_phiTop(Scalar,Scalar,Scalar,Scalar);

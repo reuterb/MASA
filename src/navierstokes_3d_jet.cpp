@@ -30,16 +30,13 @@
 
 // Private methods declarations
 template <typename Scalar>
-Scalar helper_U(Scalar y);
+Scalar helper_Ujet(Scalar y);
 
 template <typename Scalar>
-Scalar helper_Z(Scalar y);
-
-template <typename Scalar>
-Scalar helper_T(Scalar t);
+Scalar helper_Tjet(Scalar t);
 
 template <typename Scalar, typename Scalar2>
-Scalar rhoMap(Scalar Z, Scalar2 at);
+Scalar rhoMapjet(Scalar Z, Scalar2 at);
 
 //template <typename Scalar>
 //NumberVector DivTauij(Scalar x1, Scalar y1, Scalar z1, Scalar t)
@@ -113,7 +110,7 @@ int MASA::navierstokes_3d_jet<Scalar>::init_var()
   err += this->set_var("noSlip",0);
   err += this->set_var("addMean",0);
   err += this->set_var("zero",0.);
-  err += this->set_var("one",1);
+  err += this->set_var("one",1.);
 
   return err;
 
@@ -151,12 +148,12 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_rho(Scalar x1, Scalar y1, Scala
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar U = helper_U(y) * helper_T(t1);
+  ADScalar U = helper_Ujet(y) * helper_Tjet(t1);
 
-  ADScalar zVar = helper_U(y) * helper_T(t1);
-  ADScalar rho  = rhoMap(zVar,at);
+  ADScalar zVar = helper_Ujet(y) * helper_Tjet(t1);
+  ADScalar rho  = rhoMapjet(zVar,at);
 
-  ADScalar V = -rho.derivatives()[1];
+  ADScalar mC = -rhoMapjet(helper_Ujet(y) * helper_Tjet(t1), at).derivatives()[1];
 
   // Time part
 
@@ -169,11 +166,9 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_rho(Scalar x1, Scalar y1, Scala
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar zVarTime = helper_U(y1) * helper_T(tt);
+  ADTimeScalar zVarTime = helper_Ujet(y1) * helper_Tjet(tt);
 
-  ADTimeScalar rhoTime = rhoMap(zVarTime,at);
-
-  ADScalar mC = rho*V;
+  ADTimeScalar rhoTime = rhoMapjet(zVarTime,at);
 
   // Rho equation residuals
   Scalar Q_rho = 
@@ -206,13 +201,13 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scalar 
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar zVar = helper_U(y) * helper_T(t1);
+  ADScalar zVar = helper_Ujet(y) * helper_Tjet(t1);
 
-  ADScalar rho = rhoMap(zVar,at);
+  ADScalar rho = rhoMapjet(zVar,at);
   ADScalar mu  = rho; 
 
-  U[0] =  helper_U(y) * helper_T(t1);
-  U[1] = -rho.derivatives()[1];
+  U[0] =  helper_Ujet(y) * helper_Tjet(t1);
+  U[1] = -rhoMapjet(helper_Ujet(y) * helper_Tjet(t1), at).derivatives()[1]/rho;
   U[2] = 0.;
 
   // Time part
@@ -226,7 +221,7 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scalar 
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar zTime = helper_U(yt) * helper_T(tt);
+  ADTimeScalar zTime = helper_Ujet(yt) * helper_Tjet(tt);
 
   // Z equation residuals
   Scalar Q_z = 
@@ -270,12 +265,12 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Scalar
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type rho = rhoMap(helper_U(y2) * helper_T(t1), at);
+  D2Type rho = rhoMapjet(helper_Ujet(y2) * helper_Tjet(t1), at);
 
   D2Type mu  = rho;
 
-  U[0] = helper_U(y2) * helper_T(t1);
-  U[1] = -rhoMap(helper_U(y) * helper_T(t1), at).derivatives()[1];
+  U[0] = helper_Ujet(y2) * helper_Tjet(t1);
+  U[1] = -rhoMapjet(helper_Ujet(y) * helper_Tjet(t1), at).derivatives()[1]/rho;
 
   // Time part
 
@@ -288,7 +283,7 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Scalar
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar m1Time = raw_value(rho) * helper_U(y1) * helper_T(tt);
+  ADTimeScalar m1Time = raw_value(rho) * helper_Ujet(y1) * helper_Tjet(tt);
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
@@ -314,6 +309,66 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Scalar
 
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+
+  return 0.;
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m1Top(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef D1Type ADScalar;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zVal, rho, m1;
+
+  zVal = helper_Ujet(y) * helper_Tjet(t1);
+
+  rho = rhoMapjet(zVal,at);
+
+  m1 = rho * helper_Ujet(y) * helper_Tjet(t1);
+
+  return m1.derivatives()[1];
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m1Bottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef D1Type ADScalar;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zVal, rho, m1;
+
+  zVal = helper_Ujet(y) * helper_Tjet(t1);
+
+  rho = rhoMapjet(zVal,at);
+
+  m1 = rho * helper_Ujet(y) * helper_Tjet(t1);
+
+  return m1.derivatives()[1];
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m3Top(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
+{
+
+  return 0.;
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_m3Bottom(Scalar x1, Scalar y1, Scalar z1, Scalar t1)
 {
 
   return 0.;
@@ -357,7 +412,7 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_q_phiBottom(Scalar x1, Scalar y1,
 // ----------------------------------------
 //
 template <typename Scalar>
-Scalar helper_U(Scalar y)
+Scalar helper_Ujet(Scalar y)
 {
   Scalar func;
   func = .5 * (std::tanh( (y + off)/delta ) - std::tanh( (y - off)/delta ));
@@ -366,20 +421,20 @@ Scalar helper_U(Scalar y)
 }
 
 template <typename Scalar>
-Scalar helper_T(Scalar t)
+Scalar helper_Tjet(Scalar t)
 {
   Scalar func;
 
   //func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
-  //func = std::exp(t/1e-3);
-  func = std::exp(-t);
-
+  func = std::exp(-t/1e-3);
+  //func = std::exp(-t);
+  //
   return func;
 }
 
 template <typename Scalar, typename Scalar2>
-Scalar rhoMap(Scalar Z, Scalar2 at)
+Scalar rhoMapjet(Scalar Z, Scalar2 at)
 {
   Scalar rho;
 
@@ -410,11 +465,11 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_mD_1(Scalar x1,
 
   Scalar zVal, rho;
 
-  zVal = raw_value(helper_U(y) * helper_T(t1));
+  zVal = raw_value(helper_Ujet(y) * helper_Tjet(t1));
 
-  rho = rhoMap(zVal,at);
+  rho = rhoMapjet(zVal,at);
 
-  exact_1 = raw_value(rho * helper_U(y) * helper_T(t1));
+  exact_1 = raw_value(rho * helper_Ujet(y) * helper_Tjet(t1));
 
   return exact_1;
 }
@@ -467,8 +522,8 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_mC_2(Scalar x1,
 
   Scalar exact_2;
 
-  zVal = helper_U(y)*helper_T(t1);
-  rho  = rhoMap(zVal,at);
+  zVal = helper_Ujet(y)*helper_Tjet(t1);
+  rho  = rhoMapjet(zVal,at);
 
   exact_2 = -rho.derivatives()[1];
 
@@ -493,8 +548,8 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_mean_mC_2(Scalar x1,
 
   Scalar exact_2;
 
-  zVal = helper_U(y)*helper_T(t1);
-  rho  = rhoMap(zVal,at);
+  zVal = helper_Ujet(y)*helper_Tjet(t1);
+  rho  = rhoMapjet(zVal,at);
 
   exact_2 = -rho.derivatives()[1];
 
@@ -527,9 +582,9 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_rho(Scalar x1,
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  Scalar zVar = raw_value(helper_U(y) * helper_T(t1));
+  Scalar zVar = helper_Ujet(y1) * helper_Tjet(t1);
 
-  Scalar exact_rho = rhoMap(zVar,at);
+  Scalar exact_rho = rhoMapjet(zVar,at);
   
   return exact_rho;
 }
@@ -560,7 +615,7 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_z(Scalar x1,
 
   Scalar exact_z;
 
-  exact_z = raw_value(helper_U(y) * helper_T(t1));
+  exact_z = raw_value(helper_Ujet(y) * helper_Tjet(t1));
 
   return exact_z;
 }
@@ -580,9 +635,9 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_mu(Scalar x1,
 
   Scalar exact_mu;
 
-  Scalar zVar = raw_value(helper_U(y) * helper_T(t1));
+  Scalar zVar = raw_value(helper_Ujet(y) * helper_Tjet(t1));
 
-  Scalar exact_rho = rhoMap(zVar,at);
+  Scalar exact_rho = rhoMapjet(zVar,at);
 
   exact_mu = exact_rho;
 
@@ -624,8 +679,8 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_div_mC(Scalar x1,
 
   ADScalar rho,zVal,mC;
 
-  zVal = helper_U(y)*helper_T(t1);
-  rho  = rhoMap(zVal,at);
+  zVal = helper_Ujet(y)*helper_Tjet(t1);
+  rho  = rhoMapjet(zVal,at);
 
   mC = -rho.derivatives()[1];
 
@@ -671,14 +726,14 @@ Scalar MASA::navierstokes_3d_jet<Scalar>::eval_exact_RHSz(Scalar x1, Scalar y1, 
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar zVar = helper_U(y) * helper_T(t1);
+  ADScalar zVar = helper_Ujet(y) * helper_Tjet(t1);
 
-  ADScalar rho = rhoMap(zVar,at);
+  ADScalar rho = rhoMapjet(zVar,at);
 
   ADScalar mu  = rho; 
 
-  U[0] =  helper_U(y) * helper_T(t1);
-  U[1] = -rho.derivatives()[1];
+  U[0] =  helper_Ujet(y) * helper_Tjet(t1);
+  U[1] = -rho.derivatives()[1]/rho;
   U[2] = 0.;
 
   Scalar RHS_z = raw_value(-U.dot(gradient(zVar)))
