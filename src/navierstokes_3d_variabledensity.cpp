@@ -605,7 +605,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_m1(Scalar x1, Scala
         -
                 // RHS
                 raw_value(C12.derivatives()[1]
-                + 1./re*Tau[0][1].derivatives()[1]);
+                + 0.*1./re*Tau[0][1].derivatives()[1]);
 
   return Q_m1;
 }
@@ -1350,7 +1350,8 @@ template <typename Scalar>
 Scalar helper_alpha(Scalar y)
 {
   Scalar func;
-  func = 2.0 - std::pow(y,Scalar(4.0));
+  // make sure drho/dy = 0 at the boundary
+  func = 2.0 + std::pow(y,Scalar(2.0)) - .5*std::pow(y,Scalar(4.0));
 
   return func;
 }
@@ -1379,10 +1380,10 @@ Scalar helper_T(Scalar t)
 {
   Scalar func;
 
-  //func = 1.;
+  func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
   //func = std::exp(t/1e-3);
-  func = std::exp(t);
+  //func = std::exp(t);
 
   return func;
 }
