@@ -1046,6 +1046,48 @@ module masa
   end interface
 
   interface
+     !> Evaluates the 'four' dimensional source term of pressure.
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the source term.
+     !!
+     real (c_double) function masa_eval_4d_source_p(x,y,z,t) bind (C,name='masa_eval_4d_source_p')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+     end function masa_eval_4d_source_p
+  end interface
+
+  interface
+     !> Evaluates the 'four' dimensional source term of pressure (boundary).
+     !!
+     !! @param[in] x Real(8) value of the x-coordinate.
+     !! @param[in] y Real(8) value of the y-coordinate.
+     !! @param[in] z Real(8) value of the z-coordinate.
+     !! @param[in] t Real(8) value of the time.
+     !! @return Real(8) value for the source term.
+     !!
+     real (c_double) function masa_eval_4d_source_pBound(x,y,z,t) bind (C,name='masa_eval_4d_source_pBound')
+       use iso_c_binding
+       implicit none
+
+       real (c_double), value :: x
+       real (c_double), value :: y
+       real (c_double), value :: z
+       real (c_double), value :: t
+
+     end function masa_eval_4d_source_pBound
+  end interface
+
+  interface
      !> Evaluates the 'four' dimensional source term of m1.
      !!
      !! @param[in] x Real(8) value of the x-coordinate.
@@ -2337,6 +2379,21 @@ module masa
      end function masa_eval_4d_grad_DivTau
   end interface 
    
+  interface
+     real (c_double) function masa_eval_4d_Tau(x,y,z,t,it,jt) bind (C,name='masa_eval_4d_grad_Tau')
+       use iso_c_binding
+       implicit none
+
+       real    (c_double), value :: x
+       real    (c_double), value :: y
+       real    (c_double), value :: z
+       real    (c_double), value :: t
+       integer (c_int),    value :: it
+       integer (c_int),    value :: jt
+
+     end function masa_eval_4d_Tau
+  end interface 
+ 
   interface
      real (c_double) function masa_eval_4d_grad_C(x,y,z,t,it) bind (C,name='masa_eval_4d_grad_C')
        use iso_c_binding

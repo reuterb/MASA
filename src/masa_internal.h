@@ -278,6 +278,8 @@ namespace MASA
     virtual Scalar eval_q_phi(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (phi) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (omega) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_z(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (Z) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+    virtual Scalar eval_q_p(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (pressure) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
+     virtual Scalar eval_q_pBound(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (pressure) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m1) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term (m3) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
     virtual Scalar eval_q_m1Top(Scalar,Scalar,Scalar,Scalar){std::cout << "MASA ERROR:: Source Term m1Top) is unavailable or not properly loaded.\n"; return -1.33;};  // overloaded for 4d problems
@@ -335,8 +337,7 @@ namespace MASA
 
     virtual Scalar eval_g_jacF(Scalar,Scalar,Scalar,Scalar,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
 
-
-
+    virtual Scalar eval_g_Tau(Scalar,Scalar,Scalar,Scalar,int,int) {std::cout << "MASA ERROR:: gradient is unavailable or not properly loaded.\n";   return -1.33;};  // returns value of 3d, time-varying gradient
 
   /*
    * -------------------------------------------------------------------------------------------
@@ -2450,20 +2451,19 @@ public:
   Scalar eval_q_phi  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_rho  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_z  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_p  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_pBound  (Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_top(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_bottom(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_phiTop(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_q_phiBottom(Scalar,Scalar,Scalar,Scalar);
-//  Scalar eval_q_u(Scalar,Scalar,Scalar);
-//  Scalar eval_q_v(Scalar,Scalar,Scalar);
-//  Scalar eval_q_w(Scalar,Scalar,Scalar);
-//  Scalar eval_q_rho(Scalar,Scalar,Scalar);
   Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_rho(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_z(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_p(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_drho(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar);
@@ -2478,11 +2478,13 @@ public:
   Scalar eval_exact_RHSphi(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_exact_RHSz(Scalar,Scalar,Scalar,Scalar);
   Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_Tau(Scalar,Scalar,Scalar,Scalar,int,int);
   Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int);
   Scalar eval_g_jacF(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_u(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_v(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_w(Scalar,Scalar,Scalar,Scalar,int);
 
-//  NumberVector<int,Scalar> Cij(Scalar,Scalar,Scalar,Scalar);
-//  NumberVector<int,Scalar> DivTauij(Scalar,Scalar,Scalar,Scalar);
 };}
 // ------------------------------------------------------
 // --------------- navierstokes_3d_jet 

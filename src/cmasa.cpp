@@ -290,8 +290,9 @@ extern "C" double masa_eval_4d_grad_rho (double x,double y,double z,double t,int
 //
 //
 //
-
 extern "C" double masa_eval_4d_source_z    (double x,double y,double z,double t){return(masa_eval_source_z    <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_p    (double x,double y,double z,double t){return(masa_eval_source_p    <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_pBound    (double x,double y,double z,double t){return(masa_eval_source_pBound    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_phi    (double x,double y,double z,double t){return(masa_eval_source_phi    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_omega  (double x,double y,double z,double t){return(masa_eval_source_omega  <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_m1  (double x,double y,double z,double t){return(masa_eval_source_m1  <double>(x,y,z,t));}
@@ -325,6 +326,8 @@ extern "C" double masa_eval_4d_exact_RHSphi      (double x,double y,double z,dou
 extern "C" double masa_eval_4d_exact_RHSz      (double x,double y,double z,double t){return(masa_eval_exact_RHSz  <double>  (x,y,z,t));}
 
 extern "C" double masa_eval_4d_grad_DivTau (double x,double y,double z,double t,int i){return(masa_eval_grad_DivTau<double>(x,y,z,t,i));}
+
+extern "C" double masa_eval_4d_grad_Tau (double x,double y,double z,double t,int i,int j){return(masa_eval_grad_Tau<double>(x,y,z,t,i,j));}
 
 extern "C" double masa_eval_4d_grad_C (double x,double y,double z,double t,int i){return(masa_eval_grad_C<double>(x,y,z,t,i));}
 

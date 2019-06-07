@@ -454,6 +454,12 @@ namespace MASA
   Scalar masa_eval_source_phi   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
+  Scalar masa_eval_source_p   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
+  Scalar masa_eval_source_pBound   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
   Scalar masa_eval_source_z   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
@@ -640,6 +646,9 @@ namespace MASA
 
   template <typename Scalar>
   Scalar masa_eval_grad_DivTau(Scalar,Scalar,Scalar,Scalar,int);
+
+  template <typename Scalar>
+  Scalar masa_eval_grad_Tau(Scalar,Scalar,Scalar,Scalar,int,int);
 
   template <typename Scalar>
   Scalar masa_eval_grad_C(Scalar,Scalar,Scalar,Scalar,int);

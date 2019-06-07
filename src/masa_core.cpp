@@ -1044,6 +1044,18 @@ Scalar MASA::masa_eval_source_z(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_source_p(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_p(x,y,z,t);
+}
+
+template <typename Scalar>
+Scalar MASA::masa_eval_source_pBound(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_pBound(x,y,z,t);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_source_m1(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_q_m1(x,y,z,t);
@@ -1375,6 +1387,12 @@ Scalar MASA::masa_eval_grad_DivTau(Scalar x,Scalar y,Scalar z,Scalar t,int i)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_grad_Tau(Scalar x,Scalar y,Scalar z,Scalar t,int i,int j)
+{
+  return masa_master<Scalar>().get_ms().eval_g_Tau(x,y,z,t,i,j);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_grad_C(Scalar x,Scalar y,Scalar z,Scalar t,int i)
 {
   return masa_master<Scalar>().get_ms().eval_g_C(x,y,z,t,i);
@@ -1615,6 +1633,8 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_z<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_p<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_pBound<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m1<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m3<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_top<Scalar>(Scalar,Scalar,Scalar,Scalar); \
@@ -1642,6 +1662,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_exact_RHSphi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_exact_RHSz<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_grad_DivTau<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
+  template Scalar masa_eval_grad_Tau<Scalar>(Scalar,Scalar,Scalar,Scalar,int,int); \
   template Scalar masa_eval_grad_C<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template Scalar masa_eval_grad_jacF<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template int masa_test_poly<Scalar>();                             \
