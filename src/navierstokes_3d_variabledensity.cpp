@@ -784,7 +784,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_p(Scalar x1, Scalar
     raw_value(
     // laplacian of pressure
     
-    0.*divergence(gradient(p)) -
+    divergence(gradient(p)) -
     
     // temporal part
     
@@ -792,11 +792,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_p(Scalar x1, Scalar
 
     // convection
 
-    0.*divergence(DivC) -
+    divergence(DivC) -
 
     // viscous
 
-    0.*divergence(divergence(Tau)) );
+    divergence(divergence(Tau)) );
 
   return Q_p;
 
@@ -889,7 +889,7 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_pBound(Scalar x1, S
     raw_value(
     // pressure gradient
     
-    0.*p.derivatives()[1] )  +
+    p.derivatives()[1] )  +
     
     // temporal part
     raw_value(
@@ -899,11 +899,11 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_pBound(Scalar x1, S
 
     raw_value(
 
-    0.*DivC[1] + 
+    DivC[1] + 
 
     // viscous
 
-    0.*divergence(Tau)[1] ) ;
+    divergence(Tau)[1] ) ;
 
   return Q_pBound;
 
@@ -1425,9 +1425,9 @@ Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
   Scalar func = 6.; 
 
- // return func; 
+  //return func; 
 
-  return func * helper_alpha(y);
+  //return func * helper_alpha(y);
 
   int modes = int(numModes);
 
