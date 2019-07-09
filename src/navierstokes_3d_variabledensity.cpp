@@ -718,7 +718,8 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_p(Scalar x1, Scalar
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
   typedef DualNumber<D1TimeType, NumberVector<NDIM+1, D1TimeType> > D2TimeType;
-  typedef D2TimeType ADTimeScalar;
+  typedef DualNumber<D2TimeType, NumberVector<NDIM+1, D2TimeType> > D3TimeType;
+  typedef D3TimeType ADTimeScalar;
 
   // Treat velocity,momentum as a vector
   NumberVector<NDIM, D3Type> mC,mD, U;
@@ -770,8 +771,16 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_p(Scalar x1, Scalar
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
-  ADTimeScalar rhoTime = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 xt,yt,zt) * helper_T(tt); 
+//  ADTimeScalar rhoTime = helper_zetaAlpha(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+//                                 xt,yt,zt) * helper_T(tt); 
+
+  ADTimeScalar zetaPsiTime = 
+    helper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,xt,yt,zt)*helper_T(tt);
+
+  ADTimeScalar zetaPhiTime = 
+    helper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,addMean,xt,yt,zt)*helper_T(tt);
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
@@ -784,18 +793,24 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_p(Scalar x1, Scalar
     raw_value(
     // laplacian of pressure
     
-    divergence(gradient(p)) -
+    divergence(gradient(p)) +
     
     // temporal part
     
-    (rhoTime.derivatives()[3]).derivatives()[3] -
-
+    (zetaPsiTime.derivatives()[0].derivatives()[0].derivatives()[3] + 
+     zetaPsiTime.derivatives()[1].derivatives()[1].derivatives()[3] +
+     zetaPsiTime.derivatives()[2].derivatives()[2].derivatives()[3] +
+     zetaPhiTime.derivatives()[1].derivatives()[0].derivatives()[3] +
+     zetaPhiTime.derivatives()[2].derivatives()[1].derivatives()[3] -
+     zetaPhiTime.derivatives()[0].derivatives()[1].derivatives()[3] -
+     zetaPhiTime.derivatives()[1].derivatives()[2].derivatives()[3]) -
+    
     // convection
 
     divergence(DivC) -
 
     // viscous
-
+    
     divergence(divergence(Tau)) );
 
   return Q_p;
@@ -1641,9 +1656,8 @@ Scalar helper_T(Scalar t)
 
   func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
-  //func = std::exp(t/1e-3);
+  //func = std::exp(t/1e-4);
   func = std::exp(t);
-
   return func;
 }
 
