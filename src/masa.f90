@@ -2409,6 +2409,20 @@ module masa
   end interface 
 
   interface
+     real (c_double) function masa_eval_4d_grad_Z(x,y,z,t,it) bind (C,name='masa_eval_4d_grad_Z')
+       use iso_c_binding
+       implicit none
+
+       real    (c_double), value :: x
+       real    (c_double), value :: y
+       real    (c_double), value :: z
+       real    (c_double), value :: t
+       integer (c_int),    value :: it
+
+     end function masa_eval_4d_grad_Z
+  end interface 
+
+  interface
      real (c_double) function masa_eval_4d_grad_jacF(x,y,z,t,it) bind (C,name='masa_eval_4d_grad_jacF')
        use iso_c_binding
        implicit none

@@ -656,6 +656,9 @@ namespace MASA
   template <typename Scalar>
   Scalar masa_eval_grad_jacF(Scalar,Scalar,Scalar,Scalar,int);
 
+  template <typename Scalar>
+  Scalar masa_eval_grad_Z(Scalar,Scalar,Scalar,Scalar,int);
+
   // --------------------------------
   // internal masa functions user might want to call
   // --------------------------------

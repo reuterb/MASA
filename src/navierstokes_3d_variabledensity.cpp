@@ -1442,7 +1442,7 @@ Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
   //return func; 
 
-  //return func * helper_alpha(y);
+  return func * helper_alpha(y);
 
   int modes = int(numModes);
 
@@ -1451,6 +1451,7 @@ Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
     case 1:
 
       func += .6*helper_zeta(kx1,kz1,x,z)*helper_alpha(y);
+      //func += .6*helper_alpha(y);
       //func += .1*helper_zeta(kx1,kz1,x,z)*helper_alpha(y);
       break;
 
@@ -2492,6 +2493,24 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_w(Scalar x1, Scalar
   NumberVector<NDIM, D2Type> dw = gradient(U[2]);
 
   return raw_value(dw[i]);
+
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_g_Z(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef D1Type ADScalar;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  NumberVector<NDIM, D1Type> dZ = gradient(
+      helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+        x,y,z) ) * helper_T(t1);
+
+  return raw_value(dZ[i]);
 
 }
 

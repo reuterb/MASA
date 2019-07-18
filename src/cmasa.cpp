@@ -331,4 +331,6 @@ extern "C" double masa_eval_4d_grad_Tau (double x,double y,double z,double t,int
 
 extern "C" double masa_eval_4d_grad_C (double x,double y,double z,double t,int i){return(masa_eval_grad_C<double>(x,y,z,t,i));}
 
+extern "C" double masa_eval_4d_grad_Z (double x,double y,double z,double t,int i){return(masa_eval_grad_Z<double>(x,y,z,t,i));}
+
 extern "C" double masa_eval_4d_grad_jacF (double x,double y,double z,double t,int i){return(masa_eval_grad_jacF<double>(x,y,z,t,i));}

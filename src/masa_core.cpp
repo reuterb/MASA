@@ -1399,6 +1399,12 @@ Scalar MASA::masa_eval_grad_C(Scalar x,Scalar y,Scalar z,Scalar t,int i)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_grad_Z(Scalar x,Scalar y,Scalar z,Scalar t,int i)
+{
+  return masa_master<Scalar>().get_ms().eval_g_Z(x,y,z,t,i);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_grad_jacF(Scalar x,Scalar y,Scalar z,Scalar t,int i)
 {
   return masa_master<Scalar>().get_ms().eval_g_jacF(x,y,z,t,i);
@@ -1664,6 +1670,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_grad_DivTau<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template Scalar masa_eval_grad_Tau<Scalar>(Scalar,Scalar,Scalar,Scalar,int,int); \
   template Scalar masa_eval_grad_C<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
+  template Scalar masa_eval_grad_Z<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template Scalar masa_eval_grad_jacF<Scalar>(Scalar,Scalar,Scalar,Scalar,int); \
   template int masa_test_poly<Scalar>();                             \
   template int masa_printid<Scalar>(); \
