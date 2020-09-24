@@ -102,7 +102,10 @@ template <typename Scalar>
 Scalar helper_T(Scalar t);
 
 template <typename Scalar>
-Scalar rhoMap(Scalar Z, Scalar At);
+Scalar rhoMapVD(Scalar Z, Scalar At);
+
+template <typename Scalar>
+Scalar drhoMapVD(Scalar Z, Scalar At);
 
 //template <typename Scalar>
 //NumberVector DivTauij(Scalar x1, Scalar y1, Scalar z1, Scalar t)
@@ -1666,7 +1669,7 @@ Scalar helper_T(Scalar t)
 }
 
 template <typename Scalar>
-Scalar rhoMap(Scalar Z, Scalar at)
+Scalar rhoMapVD(Scalar Z, Scalar at)
 {
   Scalar rho;
 
@@ -1677,9 +1680,9 @@ Scalar rhoMap(Scalar Z, Scalar at)
 }
 
 template <typename Scalar>
-Scalar drhoMap(Scalar Z, Scalar at)
+Scalar drhoMapVD(Scalar Z, Scalar at)
 {
-  Scalar rho;
+  Scalar drho;
 
   drho = ( 1.0 + at ) / ( 1.0 + at - 2.0*at*Z );
 

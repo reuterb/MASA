@@ -2490,6 +2490,79 @@ public:
 
 };}
 // ------------------------------------------------------
+// --------------- navierstokes_3d_rhoMap 
+// ------------------------------------------------------
+namespace MASA{
+template <typename Scalar>
+class navierstokes_3d_rhoMap : public manufactured_solution<Scalar>
+{
+  using manufactured_solution<Scalar>::pi;
+  using manufactured_solution<Scalar>::PI;
+
+private:
+  Scalar re;
+  Scalar sc;
+  Scalar at;
+  Scalar numModes;
+  Scalar kx1;
+  Scalar kx2;
+  Scalar kx3;
+  Scalar kx4;
+  Scalar kx5;
+  Scalar kz1;
+  Scalar kz2;
+  Scalar kz3;
+  Scalar kz4;
+  Scalar kz5;
+  Scalar noSlip;
+  Scalar addMean;
+  Scalar zero;
+  Scalar one;
+
+public:
+  navierstokes_3d_rhoMap();
+  int init_var();
+  Scalar eval_q_omega(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_phi  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_rho  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_z  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_p  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_pBound  (Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m1(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_m3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_top(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_bottom(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_phiTop(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_q_phiBottom(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_omega(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_phi(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_rho(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_z(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_p(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mu(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_drho(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mD_1(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mD_2(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mD_3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mC_1(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mC_2(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mean_mC_2(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_mC_3(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_div_mC(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_RHSomega(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_RHSphi(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_exact_RHSz(Scalar,Scalar,Scalar,Scalar);
+  Scalar eval_g_DivTau(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_Tau(Scalar,Scalar,Scalar,Scalar,int,int);
+  Scalar eval_g_C(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_Z(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_jacF(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_u(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_v(Scalar,Scalar,Scalar,Scalar,int);
+  Scalar eval_g_w(Scalar,Scalar,Scalar,Scalar,int);
+
+};}
+// ------------------------------------------------------
 // --------------- navierstokes_3d_jet 
 // ------------------------------------------------------
 namespace MASA{

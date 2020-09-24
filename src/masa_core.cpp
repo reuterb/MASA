@@ -163,6 +163,7 @@ int get_list_mms(std::vector<manufactured_solution<Scalar>*>& anim)
   anim.push_back(new navierstokes_3d_incompbouss_homogeneous<Scalar>());
   anim.push_back(new navierstokes_3d_transient_sutherland<Scalar>());
   anim.push_back(new navierstokes_3d_variabledensity<Scalar>());
+  anim.push_back(new navierstokes_3d_rhoMap<Scalar>());
   anim.push_back(new navierstokes_3d_jet<Scalar>());
 #endif // HAVE_METAPHYSICL
 
