@@ -519,6 +519,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_q_z(Scalar x1, Scalar
 
         +
                 // U dot grad(Z)
+                // For new iterative method, we will 
+                // need to be sure that the continuity solve
+                // gives us back m^c (scaled appropriately)
                 raw_value(U.dot(gradient(zVar)))
         
         -
@@ -1673,6 +1676,17 @@ Scalar rhoMap(Scalar Z, Scalar at)
 
 }
 
+template <typename Scalar>
+Scalar drhoMap(Scalar Z, Scalar at)
+{
+  Scalar rho;
+
+  drho = ( 1.0 + at ) / ( 1.0 + at - 2.0*at*Z );
+
+  return drho;
+
+}
+
 //
 // main functions
 //
@@ -2547,7 +2561,9 @@ Scalar MASA::navierstokes_3d_variabledensity<Scalar>::eval_exact_RHSz(Scalar x1,
  
   ADScalar mu  = helper_beta(y); //helper_zeta(kx,kz,x,z) * helper_beta(y);// * helper_T(t1); 
 
-  U = (mD + mC) / rho;
+  // set mC to zero for new method
+  
+  U = (mD + 0.*mC) / rho;
  
   ADScalar zVar = helper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
                                        x,y,z) * helper_T(t1);
