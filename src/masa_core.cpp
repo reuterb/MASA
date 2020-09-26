@@ -1045,6 +1045,12 @@ Scalar MASA::masa_eval_source_z(Scalar x,Scalar y,Scalar z,Scalar t)
 }
 
 template <typename Scalar>
+Scalar MASA::masa_eval_source_zMc(Scalar x,Scalar y,Scalar z,Scalar t)
+{
+  return masa_master<Scalar>().get_ms().eval_q_zMc(x,y,z,t);
+}
+
+template <typename Scalar>
 Scalar MASA::masa_eval_source_p(Scalar x,Scalar y,Scalar z,Scalar t)
 {
   return masa_master<Scalar>().get_ms().eval_q_p(x,y,z,t);
@@ -1640,6 +1646,7 @@ int MASA::masa_get_numeric_version()
   template Scalar masa_eval_source_omega<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_phi<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_z<Scalar>(Scalar,Scalar,Scalar,Scalar); \
+  template Scalar masa_eval_source_zMc<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_p<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_pBound<Scalar>(Scalar,Scalar,Scalar,Scalar); \
   template Scalar masa_eval_source_m1<Scalar>(Scalar,Scalar,Scalar,Scalar); \

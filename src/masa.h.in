@@ -463,6 +463,9 @@ namespace MASA
   Scalar masa_eval_source_z   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>
+  Scalar masa_eval_source_zMc   (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
+
+  template <typename Scalar>
   Scalar masa_eval_source_m1    (Scalar,Scalar,Scalar,Scalar); // x,y,z,t
 
   template <typename Scalar>

@@ -291,6 +291,7 @@ extern "C" double masa_eval_4d_grad_rho (double x,double y,double z,double t,int
 //
 //
 extern "C" double masa_eval_4d_source_z    (double x,double y,double z,double t){return(masa_eval_source_z    <double>(x,y,z,t));}
+extern "C" double masa_eval_4d_source_zMc    (double x,double y,double z,double t){return(masa_eval_source_zMc    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_p    (double x,double y,double z,double t){return(masa_eval_source_p    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_pBound    (double x,double y,double z,double t){return(masa_eval_source_pBound    <double>(x,y,z,t));}
 extern "C" double masa_eval_4d_source_phi    (double x,double y,double z,double t){return(masa_eval_source_phi    <double>(x,y,z,t));}
