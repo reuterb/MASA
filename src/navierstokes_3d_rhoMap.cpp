@@ -101,6 +101,9 @@ Scalar rmhelper_delta(Scalar y);
 template <typename Scalar>
 Scalar rmhelper_T(Scalar t);
 
+template <typename Scalar>
+Scalar rmhelper_Tz(Scalar t);
+
 template <typename Scalar, typename Scalar2>
 Scalar rhoMap(Scalar Z, Scalar2 At);
 
@@ -200,7 +203,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_omega(Scalar x1, Scalar y1, 
   typedef D4TimeType ADTimeScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, D3Type> U,mD,mC;
+  NumberVector<NDIM, ADScalar> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -224,12 +227,19 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_omega(Scalar x1, Scalar y1, 
   D3Type y3 = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D3Type z3 = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D3Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x3,y3,z3) * rmhelper_T(t1);
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  D3Type rho = rhoMap(zVar,at); 
-  D3Type mu  = rhoMap(zVar,at); 
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D3Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x3,y3,z3) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
@@ -259,13 +269,13 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_omega(Scalar x1, Scalar y1, 
 
   // get DivCij
 
-  NumberVector<NDIM, D2Type> DivC = -divergence(rho*U.outerproduct(U));
+  NumberVector<NDIM, D3Type> DivC = -divergence(rho*U.outerproduct(U));
 
   // get DivTauij
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
-  NumberVector<NDIM, D2Type> DivTau = 
+  NumberVector<NDIM, D3Type> DivTau = 
     divergence(
         mu * (gradient(U) + transpose(gradient(U)) 
               - 2./3. * divergence(U)*I) );
@@ -308,7 +318,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_phi(Scalar x1, Scalar y1, Sc
   typedef D5TimeType ADTimeScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, D4Type> U,mD,mC;
+  NumberVector<NDIM, ADScalar> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -332,12 +342,20 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_phi(Scalar x1, Scalar y1, Sc
   D4Type x4 = D4Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D4Type y4 = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D4Type z4 = D4Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
-  D4Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x4,y4,z4) * rmhelper_T(t1);
 
-  D4Type rho = rhoMap(zVar,at); 
-  D4Type mu  = rhoMap(zVar,at); 
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D4Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x4,y4,z4) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
@@ -371,21 +389,21 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_phi(Scalar x1, Scalar y1, Sc
 
   // get DivCij
 
-  NumberVector<NDIM, D3Type > DivC = -divergence(rho*U.outerproduct(U));
+  NumberVector<NDIM, D4Type > DivC = -divergence(rho*U.outerproduct(U));
 
   // get DivTauij
 
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
-  NumberVector<NDIM, D3Type> DivTau = 
+  NumberVector<NDIM, D4Type> DivTau = 
     divergence(
         mu * (gradient(U) + transpose(gradient(U)) 
               - 2./3. * divergence(U)*I) );
 
   // get divergences
   
-  D2Type DivDivC   = divergence(DivC);
-  D2Type DivDivTau = divergence(DivTau);
+  D3Type DivDivC   = divergence(DivC);
+  D3Type DivDivTau = divergence(DivTau);
 
   // phi equation residual
   Scalar Q_phi = 
@@ -402,7 +420,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_phi(Scalar x1, Scalar y1, Sc
               - 1./re*divergence(gradient(DivTau[1]))
               + 1./re*DivDivTau.derivatives()[1]
                 // gravity
-              + ( rho.derivatives()[0].derivatives()[0] + 
+              + 0.*( rho.derivatives()[0].derivatives()[0] + 
                   rho.derivatives()[2].derivatives()[2] )
 
               );
@@ -419,7 +437,8 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_rho(Scalar x1, Scalar y1, Sc
   typedef D2Type ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
-  typedef D1TimeType ADTimeScalar;
+  typedef DualNumber<D1TimeType, NumberVector<NDIM+1, D1TimeType> > D2TimeType;
+  typedef D2TimeType ADTimeScalar;
 
   // Treat momentum as a vector
   NumberVector<NDIM, D1Type> mC;
@@ -445,16 +464,25 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_rho(Scalar x1, Scalar y1, Sc
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
+  ADTimeScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,xt,yt,zt);
+
   ADTimeScalar zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         xt,yt,zt) * rmhelper_T(tt);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(tt);
+
+  // TODO NOT SURE THIS WORKS BUT SHOULD NOT MATTER NO MORE RHO SOURCE!
+
+  //ADTimeScalar zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       xt,yt,zt) * rmhelper_T(tt);
 
   ADTimeScalar rho = rhoMap(zVar,at); 
 
   // Rho equation residuals
   Scalar Q_rho = 
                 // Temporal part
-                rho.derivatives()[3]
+                raw_value(rho.derivatives()[3])
 
         +
                 // Div mC
@@ -470,10 +498,12 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scal
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
   typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
-  typedef D2Type ADScalar;
+  typedef DualNumber<D3Type, NumberVector<NDIM, D3Type> > D4Type;
+  typedef D4Type ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
-  typedef D1TimeType ADTimeScalar;
+  typedef DualNumber<D1TimeType, NumberVector<NDIM+1, D1TimeType> > D2TimeType;
+  typedef D2TimeType ADTimeScalar;
 
   // Treat velocity as a vector
   NumberVector<NDIM, ADScalar> U,mC,mD;
@@ -497,14 +527,20 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scal
 
   mC = gradient(zetaPsi)*rmhelper_T(t1);
 
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
   ADScalar zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //ADScalar zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x,y,z) * rmhelper_T(t1);
   ADScalar rho  = rhoMap(zVar,at); 
   ADScalar mu   = rhoMap(zVar,at);
 
-  // TODO getting rid of mc contribution!
-  U = (mD + 0.*mC) / rho;
+  U = (mD + mC) / rho;
 
   // Time part
 
@@ -517,14 +553,21 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_z(Scalar x1, Scalar y1, Scal
   ADTimeScalar tt = 
     ADTimeScalar(t1,NumberVectorUnitVector<NDIM+1, 3, Scalar>::value());
 
+  ADTimeScalar zetaPsiZtime = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,xt,yt,zt);
+
   ADTimeScalar zTime = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         xt,yt,zt)*rmhelper_T(tt);
+    -divergence(gradient(zetaPsiZtime)) * rmhelper_Tz(tt);
+
+  //ADTimeScalar zTime = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       xt,yt,zt)*rmhelper_T(tt);
 
   // Z equation residuals
   Scalar Q_z = 
                 // Temporal part
-                zTime.derivatives()[3]
+                raw_value(zTime.derivatives()[3])
 
         +
                 // U dot grad(Z)
@@ -549,7 +592,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_zMc(Scalar x1, Scalar y1, Sc
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
   typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
-  typedef D2Type ADScalar;
+  typedef D3Type ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
   typedef D1TimeType ADTimeScalar;
@@ -576,9 +619,13 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_zMc(Scalar x1, Scalar y1, Sc
 
   mC = gradient(zetaPsi)*rmhelper_T(t1);
 
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
   ADScalar zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
   ADScalar rho  = rhoMap(zVar,at); 
   ADScalar mu   = rhoMap(zVar,at);
 
@@ -609,7 +656,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Sca
   typedef D2TimeType ADTimeScalar;
 
   // Treat velocity,momentum as a vector
-  NumberVector<NDIM, D2Type> mC,mD, U;
+  NumberVector<NDIM, ADScalar> mC,mD, U;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -634,12 +681,17 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Sca
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  D2Type rho = rhoMap(zVar,at); 
-  D2Type mu  = rhoMap(zVar,at); 
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+    //rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+    //                     x2,y2,z2) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
@@ -669,10 +721,10 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Sca
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
  
-  NumberVector<NDIM, NumberVector<NDIM,D2Type> > Tau = 
+  NumberVector<NDIM, NumberVector<NDIM,ADScalar> > Tau = 
    mu * (gradient(U) + transpose(gradient(U)) - 2./3.*divergence(U)*I);
 
-  D2Type C12 = -rho*U[0]*U[1];
+  ADScalar C12 = -rho*U[0]*U[1];
 
   // m1 equation residuals
   Scalar Q_m1 = 
@@ -700,7 +752,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Sca
   typedef D2TimeType ADTimeScalar;
 
   // Treat velocity,momentum as a vector
-  NumberVector<NDIM, D2Type> mC,mD, U;
+  NumberVector<NDIM, ADScalar> mC,mD, U;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -725,12 +777,19 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Sca
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  D2Type rho = rhoMap(zVar,at); 
-  D2Type mu  = rhoMap(zVar,at); 
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
@@ -760,10 +819,10 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Sca
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
  
-  NumberVector<NDIM, NumberVector<NDIM,D2Type> > Tau = 
+  NumberVector<NDIM, NumberVector<NDIM,ADScalar> > Tau = 
    mu * (gradient(U) + transpose(gradient(U)) - 2./3.*divergence(U)*I);
 
-  D2Type C23 = -rho*U[1]*U[2];
+  ADScalar C23 = -rho*U[1]*U[2];
 
   // m3 equation residuals
   Scalar Q_m3 = 
@@ -818,9 +877,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_p(Scalar x1, Scalar y1, Scal
   D3Type y3 = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D3Type z3 = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
+  //D3Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x3,y3,z3) * rmhelper_T(t1);
+  
+  D3Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x3,y3,z3);
+
   D3Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x3,y3,z3) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
   D3Type rho = rhoMap(zVar,at); 
   D3Type mu  = rhoMap(zVar,at); 
@@ -904,7 +970,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_pBound(Scalar x1, Scalar y1,
   typedef D2TimeType ADTimeScalar;
 
   // Treat velocity,momentum as a vector
-  NumberVector<NDIM, D2Type> mC,mD, U;
+  NumberVector<NDIM, ADScalar> mC,mD, U;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -925,21 +991,23 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_pBound(Scalar x1, Scalar y1,
            - zetaPhi.derivatives()[0] ) * rmhelper_T(t1);
   mD[2] =  - zetaPhi.derivatives()[1]   * rmhelper_T(t1);
 
-  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
-  D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
-  D2Type rho = rhoMap(zVar,at); 
-  D2Type mu  = rhoMap(zVar,at); 
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
-  D2Type p = rmhelper_zetaDelta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                              x2,y2,z2) * rmhelper_T(t1); 
+  ADScalar p = rmhelper_zetaDelta(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                              x,y,z) * rmhelper_T(t1); 
 
   // get DivCij
 
@@ -969,11 +1037,10 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_pBound(Scalar x1, Scalar y1,
 
   ADTimeScalar m2_C = zetaPsiTime.derivatives()[1];
 
-
   NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
     NumberVector<NDIM, Scalar>::identity();
  
-  NumberVector<NDIM, NumberVector<NDIM,D2Type> > Tau = 
+  NumberVector<NDIM, NumberVector<NDIM,ADScalar> > Tau = 
    mu * (gradient(U) + transpose(gradient(U)) - 2./3.*divergence(U)*I);
 
   Scalar Q_pBound = 
@@ -1735,6 +1802,23 @@ Scalar rmhelper_T(Scalar t)
   func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
   func = std::exp(t/1e-3);
+<<<<<<< HEAD
+=======
+  // RIGHT NOW ANY CHANGES HERE MUST BE REFLECTED BELOW!
+  // in both Tz and rhoMap
+  //func = std::exp(t);
+  return func;
+}
+
+template <typename Scalar>
+Scalar rmhelper_Tz(Scalar t)
+{
+  Scalar func;
+
+  func = 1.;
+  //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
+  func = 1e-3*std::exp(t/1e-3);
+>>>>>>> 73bc515a54eaa6990869e02f944894e5d35cff12
   //func = std::exp(t);
   return func;
 }
@@ -1744,7 +1828,9 @@ Scalar rhoMap(Scalar Z, Scalar2 at)
 {
   Scalar rho;
 
-  rho = ( 1.0 + at ) / ( 1.0 + at - 2.0*at*Z );
+  // TODO change .5 if changing scaling in time term
+
+  rho = Z + .5; //( 1.0 + at ) / ( 1.0 + at - 2.0*at*Z );
 
   return rho;
 
@@ -1756,9 +1842,9 @@ Scalar rhoMap(Scalar Z, Scalar2 at)
 // public method
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mD_1(Scalar x1, 
-                                                                      Scalar y1, 
-                                                                      Scalar z1,
-                                                                      Scalar t1)
+                                                             Scalar y1, 
+                                                             Scalar z1,
+                                                             Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1777,9 +1863,9 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mD_1(Scalar x1,
 // public method
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mD_2(Scalar x1, 
-                                                                      Scalar y1, 
-                                                                      Scalar z1,
-                                                                      Scalar t1)
+                                                             Scalar y1, 
+                                                             Scalar z1,
+                                                             Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1800,9 +1886,9 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mD_2(Scalar x1,
 // public method
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mD_3(Scalar x1, 
-                                                                      Scalar y1, 
-                                                                      Scalar z1,
-                                                                      Scalar t1)
+                                                             Scalar y1, 
+                                                             Scalar z1,
+                                                             Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1822,9 +1908,9 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mD_3(Scalar x1,
 // public method
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mC_1(Scalar x1, 
-                                                                      Scalar y1, 
-                                                                      Scalar z1,
-                                                                      Scalar t1)
+                                                             Scalar y1, 
+                                                             Scalar z1,
+                                                             Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1844,9 +1930,9 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mC_1(Scalar x1,
 // public method
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mC_2(Scalar x1, 
-                                                                      Scalar y1, 
-                                                                      Scalar z1,
-                                                                      Scalar t1)
+                                                             Scalar y1, 
+                                                             Scalar z1,
+                                                             Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1866,9 +1952,9 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mC_2(Scalar x1,
 // public method
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mean_mC_2(Scalar x1, 
-                                                                           Scalar y1, 
-                                                                           Scalar z1,
-                                                                           Scalar t1)
+                                                                  Scalar y1, 
+                                                                  Scalar z1,
+                                                                  Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
@@ -1916,14 +2002,22 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_rho(Scalar x1,
                                                                      Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
-  typedef D1Type ADScalar;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef D2Type ADScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar zVar = rmhelper_zetaGammaPlus(
-        kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,y,z) * rmhelper_T(t1);
+  //ADScalar zVar = rmhelper_zetaGammaPlus(
+  //      kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,y,z) * rmhelper_T(t1);
+  //
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
   Scalar exact_rho;
 
@@ -1959,15 +2053,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_p(Scalar x1,
 
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_drho(Scalar x1,
-                                                                      Scalar y1, 
-                                                                      Scalar z1,
-                                                                      Scalar t1)
+                                                             Scalar y1, 
+                                                             Scalar z1,
+                                                             Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef D1Type ADScalar;
 
   typedef DualNumber<Scalar, NumberVector<NDIM+1, Scalar> > D1TimeType;
-  typedef D1TimeType ADTimeScalar;
+  typedef DualNumber<D1TimeType, NumberVector<NDIM+1, D1TimeType> > D2TimeType;
+  typedef D2TimeType ADTimeScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -1983,51 +2078,68 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_drho(Scalar x1,
 
   ADTimeScalar exact_rho;
 
+  // TODO THIS IS WRONG NOW
   //exact_rho = rmhelper_zetaGammaPlus(
   //      kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,yt,zt) * rmhelper_T(tt);
 
-  exact_rho = rhoMap(rmhelper_zetaGammaPlus(
-        kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,xt,yt,zt) * rmhelper_T(tt),at);
+  ADTimeScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,xt,yt,zt);
 
-  return exact_rho.derivatives()[3];
+  ADTimeScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(tt);
+
+  exact_rho = rhoMap(zVar,at);
+
+  return raw_value(exact_rho.derivatives()[3]);
 }
 
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_z(Scalar x1,
-                                                                   Scalar y1, 
-                                                                   Scalar z1,
-                                                                   Scalar t1)
+                                                          Scalar y1, 
+                                                          Scalar z1,
+                                                          Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
-  typedef D1Type ADScalar;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef D2Type ADScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  Scalar exact_z;
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  exact_z = rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                                 x1,y1,z1) * rmhelper_T(t1);
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
-  return exact_z;
+  return raw_value(zVar);
 }
 
 template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_mu(Scalar x1,
-                                                                    Scalar y1, 
-                                                                    Scalar z1,
-                                                                    Scalar t1)
+                                                           Scalar y1, 
+                                                           Scalar z1,
+                                                           Scalar t1)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
-  typedef D1Type ADScalar;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef D2Type ADScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  ADScalar zVar = rmhelper_zetaGammaPlus(
-        kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,y,z) * rmhelper_T(t1);
+  //ADScalar zVar = rmhelper_zetaGammaPlus(
+  //      kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,x,y,z) * rmhelper_T(t1);
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
   Scalar exact_mu;
   exact_mu = rhoMap(raw_value(zVar),at);
@@ -2158,9 +2270,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_RHSomega(Scalar x1, Scal
   D3Type y3  = D3Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D3Type z3  = D3Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
+  D3Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x3,y3,z3);
+
   D3Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x3,y3,z3) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D3Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x3,y3,z3) * rmhelper_T(t1);
 
   D3Type rho = rhoMap(zVar,at); 
   D3Type mu  = rhoMap(zVar,at); 
@@ -2230,9 +2349,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_RHSphi(Scalar x1, Scalar
   D4Type y4  = D4Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D4Type z4  = D4Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
+  D4Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x4,y4,z4);
+
   D4Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x4,y4,z4) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D4Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x4,y4,z4) * rmhelper_T(t1);
 
   D4Type rho = rhoMap(zVar,at); 
   D4Type mu  = rhoMap(zVar,at); 
@@ -2269,7 +2395,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_RHSphi(Scalar x1, Scalar
               - 1./re*DivDivTau.derivatives()[1]
 
                 // gravity
-              - ( rho.derivatives()[0].derivatives()[0] + 
+              - 0.*( rho.derivatives()[0].derivatives()[0] + 
                   rho.derivatives()[2].derivatives()[2] )
 
              );
@@ -2288,7 +2414,65 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_DivTau(Scalar x1, Scalar y1,
   typedef D3Type ADScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, D2Type> U,mD,mC;
+  NumberVector<NDIM, ADScalar> U,mD,mC;
+
+  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
+  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
+  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  ADScalar zetaPhi = 
+    rmhelper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,addMean,x,y,z);
+  ADScalar zetaPsi = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  mD[0] =    zetaPhi.derivatives()[1]   * rmhelper_T(t1);
+  mD[1] = (  zetaPhi.derivatives()[2] 
+           - zetaPhi.derivatives()[0] ) * rmhelper_T(t1);
+  mD[2] =  - zetaPhi.derivatives()[1]   * rmhelper_T(t1);
+
+  mC = gradient(zetaPsi)*rmhelper_T(t1);
+
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
+
+  U = (mD + mC) / rho;
+
+  // get DivTauij
+
+  NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
+    NumberVector<NDIM, Scalar>::identity();
+  NumberVector<NDIM, ADScalar> DivTau = 
+    divergence(
+        mu * (gradient(U) + transpose(gradient(U)) 
+              - 2./3. * divergence(U)*I) );
+
+  return raw_value(DivTau[i]);
+}
+
+template <typename Scalar>
+Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_C(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
+{
+  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
+  typedef DualNumber<D3Type, NumberVector<NDIM, D3Type> > D4Type;
+  typedef D2Type ADScalar;
+
+  // Treat velocity, momentum as a vector
+  NumberVector<NDIM, ADScalar> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -2312,60 +2496,17 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_DivTau(Scalar x1, Scalar y1,
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
-
-  D2Type rho = rhoMap(zVar,at); 
-  D2Type mu  = rhoMap(zVar,at); 
-
-  U = (mD + mC) / rho;
-
-  // get DivTauij
-
-  NumberVector<NDIM, NumberVector<NDIM, Scalar> > I = 
-    NumberVector<NDIM, Scalar>::identity();
-  NumberVector<NDIM, D1Type> DivTau = 
-    divergence(
-        mu * (gradient(U) + transpose(gradient(U)) 
-              - 2./3. * divergence(U)*I) );
-
-  return raw_value(DivTau[i]);
-}
-
-template <typename Scalar>
-Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_C(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
-{
-  typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
-  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
-  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
-  typedef DualNumber<D3Type, NumberVector<NDIM, D3Type> > D4Type;
-  typedef D1Type ADScalar;
-
-  // Treat velocity, momentum as a vector
-  NumberVector<NDIM, ADScalar> U,mD,mC;
-
-  ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
-  ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
-
-  ADScalar zetaPhi = 
-    rmhelper_zetaPhi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   noSlip,addMean,x,y,z);
-  ADScalar zetaPsi = 
+  D2Type zetaPsiZ = 
     rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                   noSlip,x,y,z);
-
-  mD[0] =    zetaPhi.derivatives()[1]   * rmhelper_T(t1);
-  mD[1] = (  zetaPhi.derivatives()[2] 
-           - zetaPhi.derivatives()[0] ) * rmhelper_T(t1);
-  mD[2] =  - zetaPhi.derivatives()[1]   * rmhelper_T(t1);
-
-  mC = gradient(zetaPsi)*rmhelper_T(t1);
+                   noSlip,x2,y2,z2);
 
   ADScalar zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+  // TODO this might break or go to zero
+
+  //ADScalar zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x,y,z) * rmhelper_T(t1);
 
   ADScalar rho = rhoMap(zVar,at); 
 
@@ -2434,9 +2575,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_Tau(Scalar x1, Scalar y1, Sc
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
+  D2Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x2,y2,z2);
+
   D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
 
   D2Type rho = rhoMap(zVar,at); 
   D2Type mu  = rhoMap(zVar,at); 
@@ -2465,7 +2613,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_u(Scalar x1, Scalar y1, Scal
   typedef D3Type ADScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, D2Type> U,mD,mC;
+  NumberVector<NDIM, ADScalar> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -2485,22 +2633,25 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_u(Scalar x1, Scalar y1, Scal
 
   mC = gradient(zetaPsi)*rmhelper_T(t1);
 
-  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
-  D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
-  D2Type rho = rhoMap(zVar,at); 
-  D2Type mu  = rhoMap(zVar,at); 
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
   // get grad(u)
 
-  NumberVector<NDIM, D2Type> du = gradient(U[0]);
+  NumberVector<NDIM, ADScalar> du = gradient(U[0]);
 
   return raw_value(du[i]);
 
@@ -2516,7 +2667,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_v(Scalar x1, Scalar y1, Scal
   typedef D3Type ADScalar;
 
   // Treat velocity, momentum as a vector
-  NumberVector<NDIM, D2Type> U,mD,mC;
+  NumberVector<NDIM, ADScalar> U,mD,mC;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
@@ -2536,22 +2687,25 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_v(Scalar x1, Scalar y1, Scal
 
   mC = gradient(zetaPsi)*rmhelper_T(t1);
 
-  D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
-  D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
-  D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
-  D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+  ADScalar zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
-  D2Type rho = rhoMap(zVar,at); 
-  D2Type mu  = rhoMap(zVar,at); 
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
+
+  ADScalar rho = rhoMap(zVar,at); 
+  ADScalar mu  = rhoMap(zVar,at); 
 
   U = (mD + mC) / rho;
 
   // get grad(U)
 
-  NumberVector<NDIM, D2Type> dv = gradient(U[1]);
+  NumberVector<NDIM, ADScalar> dv = gradient(U[1]);
 
   return raw_value(dv[i]);
 
@@ -2591,9 +2745,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_w(Scalar x1, Scalar y1, Scal
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
+  D2Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x2,y2,z2);
+
   D2Type zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x2,y2,z2) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //D2Type zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x2,y2,z2) * rmhelper_T(t1);
 
   D2Type rho = rhoMap(zVar,at); 
   D2Type mu  = rhoMap(zVar,at); 
@@ -2612,16 +2773,26 @@ template <typename Scalar>
 Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_Z(Scalar x1, Scalar y1, Scalar z1, Scalar t1, int i)
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
+  typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
+  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
   typedef D1Type ADScalar;
 
   ADScalar x = ADScalar(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   ADScalar y = ADScalar(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   ADScalar z = ADScalar(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
 
-  NumberVector<NDIM, D1Type> dZ = gradient(
-      rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-        x,y,z) ) * rmhelper_T(t1);
+  D3Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
 
+  D1Type zVar = 
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  NumberVector<NDIM, D1Type> dZ = gradient(zVar);
+      //rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+      //x,y,z) ) * rmhelper_T(t1);
+
+  // TODO could be broken
   return raw_value(dZ[i]);
 
 }
@@ -2631,7 +2802,9 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_RHSz(Scalar x1, Scalar y
 {
   typedef DualNumber<Scalar, NumberVector<NDIM, Scalar> > D1Type;
   typedef DualNumber<D1Type, NumberVector<NDIM, D1Type> > D2Type;
-  typedef D2Type ADScalar;
+  typedef DualNumber<D2Type, NumberVector<NDIM, D2Type> > D3Type;
+  typedef DualNumber<D3Type, NumberVector<NDIM, D3Type> > D4Type;
+  typedef D4Type ADScalar;
 
   // Treat velocity, momentum as a vector
   NumberVector<NDIM, ADScalar> U,mD,mC;
@@ -2654,9 +2827,16 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_exact_RHSz(Scalar x1, Scalar y
 
   mC = gradient(zetaPsi)*rmhelper_T(t1);
 
+  ADScalar zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x,y,z);
+
   ADScalar zVar = 
-    rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-                         x,y,z) * rmhelper_T(t1);
+    -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
+
+  //ADScalar zVar = 
+  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+  //                       x,y,z) * rmhelper_T(t1);
 
   ADScalar rho = rhoMap(zVar,at); 
   ADScalar mu  = rhoMap(zVar,at); 
@@ -2689,6 +2869,13 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_g_jacF(Scalar x1, Scalar y1, S
   D2Type x2 = D2Type(x1,NumberVectorUnitVector<NDIM, 0, Scalar>::value());
   D2Type y2 = D2Type(y1,NumberVectorUnitVector<NDIM, 1, Scalar>::value());
   D2Type z2 = D2Type(z1,NumberVectorUnitVector<NDIM, 2, Scalar>::value());
+
+  D2Type zetaPsiZ = 
+    rmhelper_zetaPsi(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
+                   noSlip,x2,y2,z2);
+
+  //D2Type zVar = 
+  //  -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
 
   D2Type zVar = 
     rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
