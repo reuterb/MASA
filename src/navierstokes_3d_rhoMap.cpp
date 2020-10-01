@@ -1734,7 +1734,7 @@ Scalar rmhelper_T(Scalar t)
 
   func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
-  func = std::exp(t/1e-2);
+  func = std::exp(t/1e-3);
   //func = std::exp(t);
   return func;
 }
