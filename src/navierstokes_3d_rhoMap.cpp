@@ -1677,12 +1677,18 @@ Scalar rmhelper_psi(Scalar2 kx, Scalar2 kz, Scalar y, Scalar2 noSlip)
   } else {
 
     if ( noSlip == 0.) {
-  
-      a_psi = - (kMag + 1.0)/2.0;
+
+      e_psi = 1.0;
+      a_psi =  4.0*e_psi*kMag*(kMag+1.)/(kMag*kMag + 5.*kMag + 8.);
+      c_psi = -4.0*e_psi*kMag*(kMag+3.)/(kMag*kMag + 5.*kMag + 8.);
       b_psi = 0.0;
-      c_psi = 1.0 - a_psi;
       d_psi = 0.0;
-      e_psi = 1.0/2.0*(-2.0/kMag - 2.0/a_psi - c_psi); 
+
+      //a_psi = - (kMag + 1.0)/2.0;
+      //b_psi = 0.0;
+      //c_psi = 1.0 - a_psi;
+      //d_psi = 0.0;
+      //e_psi = 1.0/2.0*(-2.0/kMag - 2.0/a_psi - c_psi); 
 
     } else {
 
