@@ -1446,7 +1446,7 @@ Scalar helper_zetaAlpha(Scalar2 kx1, Scalar2 kz1, Scalar2 kx2, Scalar2 kz2,
 
   Scalar func = 6.; 
 
-  //return func; 
+  return func; 
 
   return func * helper_alpha(y);
 
@@ -1664,7 +1664,7 @@ Scalar helper_T(Scalar t)
   func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
   //func = std::exp(t/1e-4);
-  func = std::exp(t);
+  //func = std::exp(t);
   return func;
 }
 
