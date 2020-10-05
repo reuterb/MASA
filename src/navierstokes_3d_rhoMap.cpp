@@ -1808,8 +1808,6 @@ Scalar rmhelper_T(Scalar t)
   func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
   func = std::exp(t/1e-3);
-<<<<<<< HEAD
-=======
   // RIGHT NOW ANY CHANGES HERE MUST BE REFLECTED BELOW!
   // in both Tz and rhoMap
   //func = std::exp(t);
@@ -1824,7 +1822,6 @@ Scalar rmhelper_Tz(Scalar t)
   func = 1.;
   //func = (1. + 10.*t + 20.*t*t + 30.*t*t*t); // + 1.e13*t*t + 0.*30.*t*t*t);//std::exp(t);
   func = 1e-3*std::exp(t/1e-3);
->>>>>>> 73bc515a54eaa6990869e02f944894e5d35cff12
   //func = std::exp(t);
   return func;
 }
