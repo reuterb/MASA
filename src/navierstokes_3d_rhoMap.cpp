@@ -734,7 +734,7 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Sca
         -
                 // RHS
                 raw_value(C12.derivatives()[1]
-                + 0.*1./re*Tau[0][1].derivatives()[1]);
+                + 1./re*Tau[0][1].derivatives()[1]);
 
   return Q_m1;
 }
