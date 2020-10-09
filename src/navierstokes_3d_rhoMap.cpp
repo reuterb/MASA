@@ -687,8 +687,6 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m1(Scalar x1, Scalar y1, Sca
 
   ADScalar zVar = 
     -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
-    //rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-    //                     x2,y2,z2) * rmhelper_T(t1);
 
   ADScalar rho = rhoMap(zVar,at); 
   ADScalar mu  = rhoMap(zVar,at); 
@@ -783,10 +781,6 @@ Scalar MASA::navierstokes_3d_rhoMap<Scalar>::eval_q_m3(Scalar x1, Scalar y1, Sca
 
   ADScalar zVar = 
     -divergence(gradient(zetaPsiZ)) * rmhelper_Tz(t1);
-
-  //D2Type zVar = 
-  //  rmhelper_zetaGammaPlus(kx1,kz1,kx2,kz2,kx3,kz3,kx4,kz4,kx5,kz5,numModes,
-  //                       x2,y2,z2) * rmhelper_T(t1);
 
   ADScalar rho = rhoMap(zVar,at); 
   ADScalar mu  = rhoMap(zVar,at); 
